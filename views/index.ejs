@@ -1,0 +1,378 @@
+<html>
+<head>
+    <title>Volotopia</title>
+
+    <link href='/stylesheets/bootstrap.css' rel='stylesheet'>
+    <link href="/stylesheets/main.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" ></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.min.js" ></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>
+<script src="/javascripts/angular-ui-router/release/angular-ui-router.js"></script>
+<!--load momentJS (required for angular-moment) -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-moment/0.9.0/angular-moment.min.js"></script>
+
+
+
+<script src="/javascripts/bootstrap.js" ></script>
+<script src="/javascripts/angularApp.js"></script>
+
+
+<body ng-app="Volotopia" ng-controller="MainCtrl">
+
+
+<div class="navbar navbar-static-top" ng-controller="NavCtrl">
+
+    <div class='container' role="navigation">
+        <div class='navbar-header'>
+        <a href="/" class="navbar-brand">Volotopia</a>
+            </div>
+        <ul class="nav navbar-nav">
+            <li ng-class="{ active: activeLink('home')}"><a href="/#/home">Book a Flight</a></li>
+            <li ng-class="{ active: activeLink('home')}"><a href="/#/home">My Flights</a></li>
+            <li>
+             <a href ng-click="getAirlines()" data-toggle="dropdown"  ng-class="{'dropdown-toggle': airlines}">Airlines<span class="caret"></span></a>
+
+              <ul class="dropdown-menu" ng-if="airlines">
+                <li ng-repeat="airline in airlines | orderBy: 'title'">
+                  <a href="/#/airlines/{{airline._id}}">{{airline.title}}</a>
+                </li>
+              </ul>
+            </li>
+
+
+        </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+                <li class='divider'></li>
+                <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+            </ul>
+
+
+    </div>
+
+</div>
+<div class="container">
+<ui-view></ui-view>
+    </div>
+    <div class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-4"></div>
+                <div class="col-sm-6  col-xs-6 center-block" style="font-style: italic; padding-top: 10px;">
+                    <div class="row">
+                    Volotopia is an American company
+                        </div>
+                    <div style="font-size:9.5px; padding-left:40px;" class="row center-block">
+                        @2016 volotopia.com
+                    </div>
+                </div>
+                <div class="col-sm-2  col-xs-4 " style="font-size: 9.5px;">
+                    <h7>Contact Us</h7>
+                    <ul class="list-unstyled">
+                        <li><i class="glyphicon glyphicon-globe"></i> Fairfax, VA</li>
+                        <li><i class="glyphicon glyphicon-phone"></i> 555.555.5555</li>
+                        <li><i class="glyphicon glyphicon-envelope"></i> <a href="mailto:info@volotopia.com">info@volotopia.com</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/ng-template" id="/home.html">
+<div class="jumbotron text-center" style="margin-top:50px; ">
+        <div>{{test}}</div>
+        <div style="float:right;margin-top:4px;">{{signature}}</div>
+</div>
+    </script>
+<script type="text/ng-template" id="/airlines.html">
+
+
+
+    <div ng-repeat="airline in airlines | orderBy: 'title'">
+
+        <span class="glyphicon glyphicon-star"
+              ng-click="incrementRatings(airline)">
+
+        </span>
+        <span> {{airline.ratings}} </span>
+        <span><a  ng-href="{{airline.link}}">
+            {{airline.title}}
+        </a>
+        </span>
+        <span>
+            <a href="#/airlines/{{airline._id}}">Comments ({{getCommentsCount(airline)}})</a>
+
+        </span>
+        <span>
+            <a href="#/airlines/{{airline._id}}">Routes ({{getRtouesCount(airline)}})</a>
+
+        </span>
+
+    </div>
+
+
+
+</script>
+<script type="text/ng-template" id="/airline.html">
+<h3>
+
+<span><a  ng-href="{{airline.link}}">
+    {{airline.title}}
+</a>
+</span>
+<span style= "padding-left:12px" class="glyphicon glyphicon-thumbs-up"
+      ng-click="incrementRatings(airline)">
+
+</span>
+
+<span > ({{airline.ratings}}) </span>
+  </h3>
+
+    <ul id="airlineNav" class="nav nav-tabs">
+      <li ng-class="{ active: activeLink('airline.routes')}"><a ui-sref=".routes" >Routes</a></li>
+      <li  ng-class="{ active: activeLink('airline.comments')}"><a ui-sref=".comments" >Comments</a></li>
+    </ul>
+
+<div ui-view></div>
+</script>
+
+<script type="text/ng-template" id="/airlineComments.html">
+
+    <div style="margin-top: 15px;" ng-repeat="comment in airline.comments | orderBy: '-upvotes'">
+        <span class="glyphicon glyphicon-thumbs-up"
+              ng-click="incrementUpvotes(comment)">
+
+        </span>
+        {{comment.upvotes}} - by {{comment.author}}
+        <span style="font-size:15px; margin-left:10px;">
+        {{comment.body}}
+      </span>
+
+    </div>
+    <div style="font-size:12px; float:right;" ng-hide="showAddComment()"><a ng-href=""  ng-click="addCommentClicked()"  >Add comment</a></div>
+    <div style="font-size:12px; float:right;" ng-show="showAddComment()"><a ng-href=""  ng-click="removeCommentClicked()"  >Disregard comment</a></div>
+    <form ng-submit="addComment()" style="margin-top:30px; background-color: cornsilk;" ng-show="showAddComment()">
+    <div class="container">
+    <div class="col-sm-6" style="margin-top: 20px; margin-bottom: 20px;">
+        <div class="form-group">
+        <textarea rows="4" cols="25"
+                   class="form-control"
+                   placeholder="Comment"
+                   ng-model="body" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" >Post</button>
+        </div>
+        </div>
+    </form>
+
+</script>
+
+<script type="text/ng-template" id="/airlineRoutes.html">
+
+    <div style="margin-top:15px;" ng-repeat="route in airline.routes | orderBy: 'departureDateTime'">
+
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-1">
+          <div style="margin-top: 10px;">
+            <span style="font-size:12px; float:left;" ng-show="!isAddRouteVisible && !isEditRouteVisible"><a ng-href="" ng-click="showEditRoute(route)">edit</a></span>
+          </div>
+          <div style="margin-top:5px;">
+            <span style="font-size:12px; float:left;" ng-show="!isAddRouteVisible && !isEditRouteVisible"><a ng-href="" ng-click="deleteRoute(route)">delete</a></span>
+          </div>
+        </div>
+        <div class="col-sm-2" style="margin-top:15px;">
+          <span style="font-size:16px; font-weight:600; margin-left:10px; color:navy;">
+            {{route.price | currency}}
+          </span>
+          </div>
+        <div class="col-sm-9">
+          <div>
+            <span style="font-size:15px; ">{{route.departureDateTime | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} </span><span style="font-weight: 800;color:navy;">{{route.departureAirport.code}} </span>
+
+            <span style="margin-left:5px"><i class="fa fa-long-arrow-right"></i></span>
+          </div>
+          <div>
+            <span style="font-size:15px;">{{route.arrivalDateTime | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} </span><span style="font-weight: 800; color:navy;">{{route.arrivalAirport.code}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      </div>
+      <div style="font-size:12px; float:right;" ng-show="!isAddRouteVisible && !isEditRouteVisible"><a ng-href=""  ng-click="addRouteClicked()"  >Add route</a></div>
+      <div style="font-size:12px; float:right;" ng-show="isAddRouteVisible && !isEditRouteVisible"><a ng-href=""  ng-click="removeRouteClicked()"  >Cancel add</a></div>
+      <form ng-submit="addRoute()"
+            style="margin-top:30px; background-color:cornsilk;" ng-show="showAddRoute()">
+            <div class="container">
+            <div class="col-sm-6" style="margin-top: 20px; margin-bottom: 20px;">
+          <div class="form-group">
+
+              <label for="dateDepart">Depart Date</label>
+              <input id="dateDepart"
+                      type="date"
+                     class="form-control"
+                     style="width: 400px;"
+                     placeholder="Departure"
+                     ng-model="departureDateTime" required />
+
+          </div>
+          <div class="form-group" >
+                <label for="selectDepartAirport">Departure Airport</label><br/>
+                <select  required class="form-select"  style="width: 400px;" id="selectDepartAirport" placeholder="Departure Airport" ng-model="departureAirport"
+                ng-options="airport._id as airport.code for airport in airports | orderBy: 'code'">
+                 <option value="">-- Select Departure Airport --</option>
+                </select>
+
+          </div>
+
+
+          <div class="form-group" >
+              <label for="dateArrive">Arrive Date</label>
+              <input type="date"
+                      id="dateArrive"
+                     class="form-control"
+                     style="width: 400px;"
+                     placeholder="Arrival"
+                     ng-model="arrivalDateTime" required/>
+
+          </div>
+          <div class="form-group" >
+                    <label for="selectArriveAirport">Destination Airport</label><br/>
+                     <select  class="form-select" required id="selectArriveAirport" style="width: 400px;" placeholder="Arrival Airport" ng-model="arrivalAirport"
+                     ng-options="airport._id as airport.code for airport in airports | orderBy: 'code'">
+                      <option value="">-- Select Destination Airport --</option>
+                     </select>
+
+          </div>
+
+
+        <div class="form-group" >
+            <label for="flightPrice">Price</label>
+            <input type="Number"
+            id="flightPrice"
+            style="width: 400px;"
+            class="form-control"
+            placeholder = "price"
+            ng-model= "price" required />
+
+          </div>
+          <div class="form-group" >
+          <label for="flightOccupation">Occupied</label>
+            <input type="Number"
+            id="flightOccupation"
+            style="width: 400px;"
+            class="form-control"
+            placeholder = "occupied"
+            ng-model = "occupied" required/>
+          </div>
+          <div class="form-group" >
+            <label for="fligthCapacity">Capacity</label>
+            <input type="Number"
+            id="flightCapacity"
+            style="width: 400px;"
+            class="form-control"
+            placeholder = "capacity"
+            ng-model="capacity" required />
+
+          </div>
+
+          <span><button type="submit" class="btn btn-primary">Add Route</button></span>
+
+          </div>
+          </div>
+      </form>
+      <form ng-submit="saveRoute()"
+            style="margin-top:30px; background-color: cornsilk;" ng-show="isEditRouteVisible">
+            <div class="container">
+            <div class="col-sm-6" style="margin-top: 20px; margin-bottom: 20px;">
+          <div class="form-group">
+
+              <label for="dateDepart">Depart Date</label>
+              <input id="dateDepart"
+                      type="datetime"
+                     class="form-control"
+                     style="width: 400px;"
+                     placeholder="Departure"
+                     ng-model="editableRoute.departureDateTime" required/>
+
+          </div>
+          <div class="form-group" >
+                <label for="selectDepartAirport">Departure Airport</label><br/>
+                <select  class="form-select" required style="width: 400px;" id="selectDepartAirport" placeholder="Departure Airport" ng-model="editableRoute.departureAirport._id"
+                ng-options="airport._id as airport.code for airport in airports | orderBy: 'code'">
+                 <option value="">-- Select Departure Airport --</option>
+                </select>
+
+          </div>
+
+
+          <div class="form-group" >
+              <label for="dateArrive">Arrive Date</label>
+              <input type="datetime"
+                      id="dateArrive"
+                     class="form-control"
+                     style="width: 400px;"
+                     placeholder="Arrival"
+                     ng-model="editableRoute.arrivalDateTime" required/>
+
+          </div>
+          <div class="form-group" >
+                    <label for="selectArriveAirport">Destination Airport</label><br/>
+                     <select  class="form-select" required id="selectArriveAirport" style="width: 400px;" placeholder="Arrival Airport" ng-model="editableRoute.arrivalAirport._id"
+                     ng-options="airport._id as airport.code for airport in airports | orderBy: 'code'">
+                      <option value="">-- Select Destination Airport --</option>
+                     </select>
+
+          </div>
+
+
+        <div class="form-group" >
+            <label for="flightPrice">Price</label>
+            <input type="Number"
+            id="flightPrice"
+            style="width: 400px;"
+            class="form-control"
+            placeholder = "price"
+            ng-model= "editableRoute.price" required/>
+
+          </div>
+          <div class="form-group" >
+          <label for="flightOccupation">Occupied</label>
+            <input type="Number"
+            id="flightOccupation"
+            style="width: 400px;"
+            class="form-control"
+            placeholder = "occupied"
+            ng-model = "editableRoute.occupied" required />
+          </div>
+          <div class="form-group" >
+            <label for="fligthCapacity">Capacity</label>
+            <input type="Number"
+            id="flightCapacity"
+            style="width: 400px;"
+            class="form-control"
+            placeholder = "capacity"
+            ng-model="editableRoute.capacity" required/>
+
+          </div>
+
+          <span><button type="submit" class="btn btn-primary">Update Route</button></span>
+          <span style="left-margin:5px;"><button ng-click="hideEditRouteForm()" class="btn .btn-warning">Cancel</button></span>
+          </div>
+          </div>
+      </form>
+</script>
+<script type="text/ng-template" id="/routes.html">
+<h5>{{routes}}</h5>
+
+</script>
+
+</body>
+</html>

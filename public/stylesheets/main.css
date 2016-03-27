@@ -1,0 +1,85 @@
+html {
+    position: relative;
+    min-height: 100%;
+}
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 220px;
+    font-family: 'Open Sans', sans-serif;
+}
+.navbar-brand {
+    font-size: 26px;
+}
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 80px;
+    background-color: #333;
+    color: #efefef;
+    padding: 10px 0px 5px;
+
+}
+@media only screen and (max-width: 768px) {
+    body { margin-bottom: 400px; }
+    .footer { height: 400px; }
+}
+.footer a {
+    color: #639bcf;
+
+}
+.footer a:hover {
+    color: #d8e6f3;
+}
+
+.container {
+    max-width: 960px;
+}
+.well {
+    background-color: transparent;
+}
+.lead {
+    color: #555;
+}
+.btn-lg {
+    padding: 14px 20px;
+    margin-right: 20px;
+}
+
+/* Navigation */
+.navbar {
+   /* background-color: rgb(51,122,183); */
+    background-color: #b73338
+}
+.navbar a {
+    color: #d8e6f3;
+
+}
+.navbar a:hover {
+  color: #fff;
+}
+
+.nav>li>a:focus,
+.nav>li>a:hover,
+.nav .open>a,
+.nav .open>a:focus,
+.nav .open>a:hover,
+.dropdown-menu>li>a:focus,
+.dropdown-menu>li>a:hover {
+    background-color: #b73338;
+    color: #fff;
+}
+
+#airlineNav>li.active>a,
+#airlineNav>li.active>a:focus,
+#airlineNav>li.active>a:hover{
+  background-color: #b73338;
+  color: white;
+}
+
+#airlineNav>li>a:focus,
+#airlineNav>li>a:hover{
+  background-color: #d8e6f3;
+  color: navy;
+}
