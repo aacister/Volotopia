@@ -169,7 +169,7 @@ router.put('/routes/:route', function(req, res, next) {
         if(req.body.departureDateTime) route.departureDateTime = req.body.departureDateTime;
         if(req.body.departureAirport) route.departureAirport = req.body.departureAirport;
         if(req.body.arrivalAirport) route.arrivalAirport = req.body.arrivalAirport;
-
+        if(req.body.duration) route.duration = req.body.duration;
           route.save( function (err, savedRoute){
               if (err) send (err);
 
@@ -198,10 +198,11 @@ router.delete('/routes/:route', function(req, res, next){
 
 // get all routes
 router.get('/routes', function(req, res, next){
-  Route.find(function(err, routes){
-    if(err){return next(err);}
 
+  Route.find().deepPopulate(['arrivalAirport', 'departureAirport', 'airline']).exec(function(err, routes){
+    if(err){return next(err);}
     res.json(routes);
+
   });
 });
 

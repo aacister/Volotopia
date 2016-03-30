@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-
+mongoose.set('debug', true);
 
 var CommentSchema = new mongoose.Schema({
     body: String,

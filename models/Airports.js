@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-
+mongoose.set('debug', true);
 
 var AirportSchema = new mongoose.Schema({
     name: String,

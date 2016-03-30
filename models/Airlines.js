@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+mongoose.set('debug', true);
 var deepPopulate = require('mongoose-deep-populate')(mongoose);
 
 var AirlineSchema = new mongoose.Schema({

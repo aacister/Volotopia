@@ -16,12 +16,13 @@
 
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/angular-moment/0.9.0/angular-moment.min.js"></script>
-
-
+<script src="/javascripts/moment-timezone.js"></script>
+<!--<script src="/javascripts/moment-timezone-with-data.js"></script>
+<script src="/javascripts/moment-timezone-with-data-2010-2020.js"></script> -->
 
 <script src="/javascripts/bootstrap.js" ></script>
 <script src="/javascripts/angularApp.js"></script>
-
+<script type='text/javascript' src='/javascripts/ng-infinite-scroll/build/ng-infinite-scroll.min.js'></script>
 
 <body ng-app="Volotopia" ng-controller="MainCtrl">
 
@@ -33,7 +34,7 @@
         <a href="/" class="navbar-brand">Volotopia</a>
             </div>
         <ul class="nav navbar-nav">
-            <li ng-class="{ active: activeLink('home')}"><a href="/#/home">Book a Flight</a></li>
+            <li ng-class="{ active: activeLink('routes')}"><a href="/#/routes">Book a Flight</a></li>
             <li ng-class="{ active: activeLink('home')}"><a href="/#/home">My Flights</a></li>
             <li>
              <a href ng-click="getAirlines()" data-toggle="dropdown"  ng-class="{'dropdown-toggle': airlines}">Airlines<span class="caret"></span></a>
@@ -194,12 +195,15 @@
           </div>
         <div class="col-sm-9">
           <div>
-            <span style="font-size:15px; ">{{route.departureDateTime | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} </span><span style="font-weight: 800;color:navy;">{{route.departureAirport.code}} </span>
+            <span style="font-size:15px; ">{{route.departureDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} (EST) </span><span style="left-margin:15px; font-weight: 800;color:navy;">{{route.departureAirport.code}} </span>
 
             <span style="margin-left:5px"><i class="fa fa-long-arrow-right"></i></span>
           </div>
           <div>
-            <span style="font-size:15px;">{{route.arrivalDateTime | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} </span><span style="font-weight: 800; color:navy;">{{route.arrivalAirport.code}}</span>
+            <span style="font-size:15px;">{{route.arrivalDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'}} (EST) </span><span style="left-margin:15px;font-weight: 800; color:navy;">{{route.arrivalAirport.code}}</span>
+          </div>
+          <div>
+            <span style="font-size:15px;">duration: ~{{route.duration | amDurationFormat : 'minute'}}</span>
           </div>
         </div>
       </div>
@@ -214,12 +218,12 @@
             <div class="col-sm-6" style="margin-top: 20px; margin-bottom: 20px;">
           <div class="form-group">
 
-              <label for="dateDepart">Depart Date</label>
+              <label for="dateDepart">Departure (EST)</label>
               <input id="dateDepart"
-                      type="date"
+                      type="datetime-local"
                      class="form-control"
                      style="width: 400px;"
-                     placeholder="Departure"
+                     placeholder="yyyy-MM-ddTHH:mm:ss"
                      ng-model="departureDateTime" required />
 
           </div>
@@ -234,12 +238,12 @@
 
 
           <div class="form-group" >
-              <label for="dateArrive">Arrive Date</label>
-              <input type="date"
+              <label for="dateArrive">Arrive (EST)</label>
+              <input type="datetime-local"
                       id="dateArrive"
                      class="form-control"
                      style="width: 400px;"
-                     placeholder="Arrival"
+                     placeholder="yyyy-MM-ddTHH:mm:ss"
                      ng-model="arrivalDateTime" required/>
 
           </div>
@@ -297,9 +301,10 @@
               <label for="dateDepart">Depart Date</label>
               <input id="dateDepart"
                       type="datetime"
+
                      class="form-control"
                      style="width: 400px;"
-                     placeholder="Departure"
+
                      ng-model="editableRoute.departureDateTime" required/>
 
           </div>
@@ -316,10 +321,11 @@
           <div class="form-group" >
               <label for="dateArrive">Arrive Date</label>
               <input type="datetime"
+
                       id="dateArrive"
                      class="form-control"
                      style="width: 400px;"
-                     placeholder="Arrival"
+
                      ng-model="editableRoute.arrivalDateTime" required/>
 
           </div>
@@ -369,8 +375,101 @@
           </div>
       </form>
 </script>
+
+
 <script type="text/ng-template" id="/routes.html">
-<h5>{{routes}}</h5>
+<div class='container'>
+<div class="col-sm-2" style="height:80%; background-color: whitesmoke;">
+<div style="margin-top:75px; margin-left: 2px;">
+  <h5>Airlines:</h5>
+  <div ng-repeat="airline in airlines">
+
+        <label style="font-size:11px;">
+          <input
+            type="checkbox"
+            ng-click="setAirlineFilter($event,airline)"
+          ><span style="margin-left:5px;">{{airline.title}}</span>
+        </label>
+
+  </div>
+
+</div>
+</div>
+<div class="col-sm-10" >
+  <div  class="row" style="margin-top:15px">
+    <div class="col-sm-1"></div>
+    <div class="form-group" class="col-sm-11"  >
+      <span>
+        <select  class="form-select" required style="width: 200px;" id="selectDepartAirport"  ng-model="searchFromAirportId"
+        ng-options="airport._id as airport.code for airport in airports | orderBy: 'code'">
+         <option value="">From</option>
+        </select>
+      </span>
+      <span style="margin-left:10px;">
+             <select  class="form-select" required id="selectArriveAirport" style="width: 200px;"  ng-model="searchToAirportId"
+             ng-options="airport._id as airport.code for airport in airports | orderBy: 'code'">
+              <option value="">To</option>
+             </select>
+       </span>
+       <span style="margin-left:10px;">
+          <input id="dateDepart"
+              onfocus="(this.type='date')"
+              type="text"
+              ng-show="false"
+             style="width: 150px;"
+             placeholder="Depart"
+             ng-model="searchDepartureDate" required/>
+        </span>
+
+      </div>
+    </div>
+
+    <div class="row">
+    <div class="col-sm-11" style="height: 70%; margin-top:10px; overflow-y: scroll;">
+
+        <div  ng-show="isSearchResultsVisible" ng-repeat="route in routes | routeSearch:searchFromAirportId:searchToAirportId:searchDepartureDate:airlineFilters | orderBy: 'departureDateTime'">
+          <div class="row"  style=" padding-top: 10px; padding-bottom: 10px;">
+            <div class="col-sm-1">
+            </div>
+            <div class="col-sm-2" style="margin-top:5px; ">
+              <div><span style="font-size:16px; font-weight:600; margin-left:10px; color:navy;">
+                {{route.price | currency}}
+              </span>
+              </div>
+              <div style="margin-top: 10px; margin-left: 10px;">
+                <span><button type="submit" style="background-color:#b73338; border:#b73338;" class="btn btn-danger">Book</button>
+
+              </div>
+            </div>
+            <div class="col-sm-2" style="margin-top:15px; ">
+              <span style="font-size:15px; float:left; color: rgba(0, 0, 0, 0.5);">{{route.airline.title}}</span>
+            </div>
+            <div class="col-sm-7" style="margin-top:5px;">
+              <div>
+                <span style="font-size:15px; ">{{route.departureDateTime | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} (EST) </span><span style="font-weight: 800;color:navy;">{{route.departureAirport.code}} </span>
+
+                <span style="margin-left:5px"><i class="fa fa-long-arrow-right"></i></span>
+              </div>
+              <div>
+                <span style="font-size:15px;">{{route.arrivalDateTime | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'}} (EST) </span><span style="font-weight: 800; color:navy;">{{route.arrivalAirport.code}}</span>
+              </div>
+              <div>
+                <span style="font-size:15px;">duration: ~{{route.duration| amDurationFormat : 'minute'}} </span>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+    </div>
+    <div class="col-sm-1">
+    </div>
+
+  </div>
+
+
+
+
+
 
 </script>
 

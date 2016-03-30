@@ -1,4 +1,7 @@
-angular.module('Volotopia', ['ui.router', 'angularMoment'])
+angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll',])
+.constant('angularMomentConfig', {
+	preprocess: 'utc'
+})
     .config([
         '$stateProvider',
         '$urlRouterProvider',
@@ -80,7 +83,7 @@ angular.module('Volotopia', ['ui.router', 'angularMoment'])
                         }]
                     }
                 })
-                /*
+
                 .state('routes',{
                     url: '/routes',
                     templateUrl: '/routes.html',
@@ -88,10 +91,15 @@ angular.module('Volotopia', ['ui.router', 'angularMoment'])
                     resolve: {
                         routesResolved: ['routeFactory', function(routeFactory){
                             return routeFactory.getAll();
+                        }],
+                        airportsResolved: ['airportFactory', function(airportFactory){
+                          return airportFactory.getAll();
+                        }],
+                        airlinesResolved: ['airlineFactory', function(airlineFactory){
+                            return airlineFactory.getAll();
                         }]
                     }
                 })
-*/
             ;
 
             $urlRouterProvider.otherwise('home');
@@ -193,7 +201,6 @@ angular.module('Volotopia', ['ui.router', 'angularMoment'])
 
     return o;
   }])
-/*
     .factory('routeFactory', ['$http', function($http) {
         var o = {
             routes: []
@@ -218,7 +225,165 @@ angular.module('Volotopia', ['ui.router', 'angularMoment'])
 
         return o;
     }])
-    */
+    //filter on to, from, date
+    .filter('routeSearch',[function(){
+        return function(data,from,to, departDate, airlines){
+            var output = [];
+            if(!!to && !!from && !! departDate && airlines.length>0){
+                for(var i = 0;i<data.length; i++){
+                  var includesAirline=false;
+                    for(var a=0; a<airlines.length; a++){
+                      if(data[i].airline._id.indexOf(airlines[a]) !== -1)
+                      {
+                        includesAirline=true;
+                        break;
+                      }
+                    };
+
+                    if(data[i].arrivalAirport._id.indexOf(to) !== -1 && data[i].departureAirport._id.indexOf(from) !== -1 && data[i].departureDateTime.indexOf((new Date(departDate)).toISOString()) !== -1 && includesAirline ){
+                        output.push(data[i]);
+                    }
+                }
+            }
+            else if(!to && !!from && !! departDate  && airlines.length>0){
+
+                for(var i = 0;i<data.length; i++){
+                  var includesAirline=false;
+                    for(var a=0; a<airlines.length; a++){
+                      if(data[i].airline._id.indexOf(airlines[a]) !== -1)
+                      {
+                        includesAirline=true;
+                        break;
+                      }
+                    }
+                    if( data[i].departureAirport._id.indexOf(from) !== -1 && data[i].departureDateTime.indexOf((new Date(departDate)).toISOString()) !== -1 && includesAirline){
+                        output.push(data[i]);
+                    }
+                }
+            }
+            else if(!!to && !from && !! departDate  && airlines.length>0){
+                for(var i = 0;i<data.length; i++){
+                  var includesAirline=false;
+                    for(var a=0; a<airlines.length; a++){
+                      if(data[i].airline._id.indexOf(airlines[a]) !== -1)
+                      {
+                        includesAirline=true;
+                        break;
+                      }
+                    };
+                    if(data[i].arrivalAirport._id.indexOf(to) !== -1 && data[i].departureDateTime.indexOf((new Date(departDate)).toISOString()) !== -1 && includesAirline){
+                        output.push(data[i]);
+                    }
+                }
+            }
+            else if(!!to && !from && !departDate  && airlines.length>0){
+                for(var i = 0;i<data.length; i++){
+                  var includesAirline=false;
+                    for(var a=0; a<airlines.length; a++){
+                      if(data[i].airline._id.indexOf(airlines[a]) !== -1)
+                      {
+                        includesAirline=true;
+                        break;
+                      }
+                    };
+                    if(data[i].arrivalAirport._id.indexOf(to) !== -1 &&  includesAirline){
+                        output.push(data[i]);
+                    }
+                }
+            }
+            else if(!to && !!from &&  !departDate  && airlines.length>0){
+                for(var i = 0;i<data.length; i++){
+                  var includesAirline=false;
+                    for(var a=0; a<airlines.length; a++){
+                      if(data[i].airline._id.indexOf(airlines[a]) !== -1)
+                      {
+                        includesAirline=true;
+                        break;
+                      }
+                    };
+                    if(data[i].departureAirport._id.indexOf(from) !== -1 && includesAirline){
+                        output.push(data[i]);
+                    }
+                }
+            }
+            else if(!!to && !!from && !departDate && airlines.length>0){
+                for(var i = 0;i<data.length; i++){
+                  var includesAirline=false;
+                    for(var a=0; a<airlines.length; a++){
+                      if(data[i].airline._id.indexOf(airlines[a]) !== -1)
+                      {
+                        includesAirline=true;
+                        break;
+                      }
+                    };
+                    if(data[i].arrivalAirport._id.indexOf(to) !== -1 && data[i].departureAirport._id.indexOf(from) !== -1  && includesAirline){
+                        output.push(data[i]);
+                    }
+                }
+            }
+            else if(!to && !from && !departDate && airlines.length>0){
+                for(var i = 0;i<data.length; i++){
+                  var includesAirline=false;
+                    for(var a=0; a<airlines.length; a++){
+                      if(data[i].airline._id.indexOf(airlines[a]) !== -1)
+                      {
+                        includesAirline=true;
+                        break;
+                      }
+                    };
+                    if( includesAirline){
+                        output.push(data[i]);
+                    }
+                }
+            }
+            else if(!!to && !!from && !! departDate && airlines.length<=0){
+                for(var i = 0;i<data.length; i++){
+                    if(data[i].arrivalAirport._id.indexOf(to) !== -1 && data[i].departureAirport._id.indexOf(from) !== -1 && data[i].departureDateTime.indexOf((new Date(departDate)).toISOString()) !== -1){
+                        output.push(data[i]);
+                    }
+                }
+            } else if(!!to && !! departDate && !from && airlines.length<=0){
+                for(var i = 0;i<data.length; i++){
+                    if(data[i].arrivalAirport._id.indexOf(to) !== -1 && data[i].departureDateTime.indexOf((new Date(departDate)).toISOString()) !== -1 ){
+                        output.push(data[i]);
+                    }
+                }
+            } else if(!!to && !!from && !departDate && airlines.length<=0){
+                for(var i = 0;i<data.length; i++){
+                    if(data[i].arrivalAirport._id.indexOf(to) !== -1 && data[i].departureAirport._id.indexOf(from) !== -1){
+                        output.push(data[i]);
+                    }
+                }
+
+            }
+            else if(!!to && !from && !departDate && airlines.length<=0){
+              for(var i = 0;i<data.length; i++){
+                  if(data[i].arrivalAirport._id.indexOf(to) !== -1 ){
+                      output.push(data[i]);
+                  }
+              }
+            }
+            else if(!to && !from && !!departDate && airlines.length<=0){
+              for(var i = 0;i<data.length; i++){
+                  if(data[i].departureDateTime.indexOf((new Date(departDate)).toISOString()) !== -1){
+                      output.push(data[i]);
+                  }
+              }
+            }
+            else if(!to && !!from && !departDate && airlines.length<=0){
+              for(var i = 0;i<data.length; i++){
+                  if(data[i].departureAirport._id.indexOf(from) !== -1 ){
+                      output.push(data[i]);
+                  }
+              }
+            }
+            else {
+
+                output = data;
+            }
+            return output;
+        }
+    }])
     .controller('MainCtrl', [
         '$scope',
         'airlineFactory',
@@ -316,12 +481,25 @@ angular.module('Volotopia', ['ui.router', 'angularMoment'])
             airlineFactory.upvoteComment(airline, comment);
         };
 
+        getDuration = function( date1, date2 ) {
+      //    var ms = moment(date2,"DD/MM/YYYY HH:mm:ss").diff(moment(date1,"DD/MM/YYYY HH:mm:ss"));
+          var ms = moment.utc(date2).diff(moment.utc(date1));
+          return moment.duration(ms).asMinutes();
+
+        };
+
+
+
         $scope.addRoute = function(){
           if($scope.departureAirport === '' || $scope.departureDateTime === '' || $scope.arrivalAirport === '' || $scope.arrivalDateTime === ''
           || $scope.price === '' || $scope.occupied ==='' || $scope.capacity === '') {return;}
+
+          var duration = getDuration($scope.departureDateTime, $scope.arrivalDateTime);
+
           airlineFactory.addRoute(airline._id, {
             departureAirport: $scope.departureAirport,
             departureDateTime: $scope.departureDateTime,
+            duration: duration,
             arrivalDateTime: $scope.arrivalDateTime,
             arrivalAirport: $scope.arrivalAirport,
             price: $scope.price,
@@ -332,6 +510,7 @@ angular.module('Volotopia', ['ui.router', 'angularMoment'])
           });
           $scope.departureAirport = '';
           $scope.departureDateTime = '';
+          $scope.duration='';
           $scope.arrivalAirport = '';
           $scope.arrivalDateTime = '';
           $scope.price = '';
@@ -357,16 +536,19 @@ angular.module('Volotopia', ['ui.router', 'angularMoment'])
 
         $scope.showEditRoute = function (route) {
             $scope.isEditRouteVisible = true;
-        //    var departDate = new Date(route.departureDateTime).toISOString();
-        //    var arriveDate = new Date(route.arrivalDateTime).toISOString();
-        //    route.departureDateTime =  departDate;
-        //    route.arrivalDateTime = moment(arriveDate, "MM/DD/YYYY");
+
+      //      var departDate = new Date(route.departureDateTime);
+      //      var arriveDate = new Date(route.arrivalDateTime);
+      //      route.departureDateTime =  departDate;
+      //      route.arrivalDateTime = moment(arriveDate, "MM/DD/YYYY");
+    //        route.departureDateTime = moment(new Date(2014, 3, 19)).format('MM/DD/YYYY');
             $scope.editableRoute= angular.copy(route);
 
         };
 
         $scope.saveRoute = function() {
-
+            var duration = getDuration($scope.editableRoute.departureDateTime, $scope.editableRoute.arrivalDateTime);
+            $scope.editableRoute.duration=duration;
               airlineFactory.editRoute($scope.editableRoute._id, $scope.editableRoute)
              .success(function (route) {
                 airline.routes = $.grep(airline.routes, function(e){
@@ -389,10 +571,30 @@ angular.module('Volotopia', ['ui.router', 'angularMoment'])
            };
     }])
 
-    .controller('RoutesCtrl',['$scope', 'routeFactory', 'routesResolved',
-        function($scope, routeFactory, routesResolved){
+    .controller('RoutesCtrl',['$scope', 'routeFactory', 'routesResolved', 'airportsResolved', 'airlinesResolved',
+        function($scope, routeFactory, routesResolved, airportsResolved, airlinesResolved){
             $scope.routes=routesResolved.data;
+            $scope.airports = airportsResolved.data;
+            $scope.airlines = airlinesResolved.data;
+            $scope.isSearchResultsVisible = true;
+            $scope.airlineFilters = [];
 
+
+            $scope.setAirlineFilter = function($event, airline){
+              var id = airline._id;
+              var checkbox = $event.target;
+              var action = (checkbox.checked ? 'add' : 'remove');
+              if (action == 'add' & $scope.airlineFilters.indexOf(id) == -1) $scope.airlineFilters.push(id);
+              if (action == 'remove' && $scope.airlineFilters.indexOf(id) != -1) $scope.airlineFilters.splice($scope.airlineFilters.indexOf(id), 1);
+
+            };
+
+            $scope.loadMore = function() {
+              var last = $scope.routes[$scope.routes.length - 1];
+              for(var i = 1; i <= $scope.routes.length; i++) {
+                $scope.routes.push(last + i);
+              }
+            };
 
         }])
     .controller('NavCtrl', [
