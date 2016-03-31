@@ -5,11 +5,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+var passport = require('passport');
 var moment = require('moment-timezone');
+
 moment().tz("America/New_York").format();
 mongoose.set('debug', true);
-
-
 mongoose.connect('mongodb://localhost/Volotopia', function(err) {
     if (err) throw err;
 });
@@ -18,6 +18,8 @@ require('./models/Airlines');
 require('./models/Comments');
 require('./models/Airports');
 require('./models/Routes');
+require('./models/Users');
+require('./config/passport');
 
 var routes = require('./routes/index');
 
@@ -33,6 +35,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(passport.initialize());
 
 app.use('/', routes);
 

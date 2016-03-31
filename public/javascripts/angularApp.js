@@ -100,12 +100,82 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll',])
                         }]
                     }
                 })
-            ;
+								.state('login', {
+								  url: '/login',
+								  templateUrl: '/login.html',
+								  controller: 'AuthCtrl',
+								  onEnter: ['$state', 'auth', function($state, auth){
+								    if(auth.isLoggedIn()){
+								      $state.go('home');
+								    }
+								  }]
+								})
+								.state('register', {
+								  url: '/register',
+								  templateUrl: '/register.html',
+								  controller: 'AuthCtrl',
+								  onEnter: ['$state', 'auth', function($state, auth){
+								    if(auth.isLoggedIn()){
+								      $state.go('home');
+								    }
+								  }]
+								});
+
 
             $urlRouterProvider.otherwise('home');
         }
     ])
-.factory('airlineFactory', ['$http', function($http){
+.factory('auth', ['$http', '$window', '$state', function($http, $window, $state){
+   var auth = {};
+	 auth.saveToken = function (token){
+  		$window.localStorage['volotopia-token'] = token;
+		};
+
+		auth.getToken = function (){
+		  return $window.localStorage['volotopia-token'];
+		}
+
+		auth.isLoggedIn = function(){
+		  var token = auth.getToken();
+
+		  if(token){
+		    var payload = JSON.parse($window.atob(token.split('.')[1]));
+
+		    return payload.exp > Date.now() / 1000;
+		  } else {
+		    return false;
+		  }
+		};
+
+		auth.currentUser = function(){
+		  if(auth.isLoggedIn()){
+		    var token = auth.getToken();
+		    var payload = JSON.parse($window.atob(token.split('.')[1]));
+
+		    return payload.username;
+		  }
+		};
+
+		auth.register = function(user){
+		  return $http.post('/register', user).success(function(data){
+		    auth.saveToken(data.token);
+		  });
+		};
+
+		auth.logIn = function(user){
+		  return $http.post('/login', user).success(function(data){
+		    auth.saveToken(data.token);
+		  });
+		};
+
+		auth.logOut = function(){
+		  $window.localStorage.removeItem('volotopia-token');
+			$state.go('home');
+		};
+
+  return auth;
+}])
+.factory('airlineFactory', ['$http', 'auth', function($http, auth){
     var o = {
         airlines: []
     };
@@ -144,8 +214,8 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll',])
     };
 
     o.incrementRatings= function(airline){
-        return $http.put('/airlines/' + airline._id + '/uprate', {
-
+        return $http.put('/airlines/' + airline._id + '/uprate', null, {
+					headers: {Authorization: 'Bearer '+ auth.getToken()}
         }).success(function(data){
             airline.ratings +=1;
         });
@@ -161,29 +231,43 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll',])
 
     o.upvoteComment = function(airline, comment) {
 
-        return $http.put('/airlines/' + airline._id + '/comments/'+ comment._id + '/upvote').success(function(data){
+        return $http.put('/airlines/' + airline._id + '/comments/'+ comment._id + '/upvote', null, {
+					headers: {Authorization: 'Bearer '+auth.getToken()}
+				}).success(function(data){
             comment.upvotes += 1;
         });
     };
 
     o.addComment = function(id, comment){
-        return $http.post('/airlines/' + id + '/comments', comment);
+        return $http.post('/airlines/' + id + '/comments', comment,{
+					headers: {Authorization: 'Bearer '+auth.getToken()}
+				})
     };
 
     o.addRoute = function(id, route){
-        return $http.post('/airlines/' + id + '/routes', route);
+        return $http.post('/airlines/' + id + '/routes', route,
+			{
+				headers: {Authorization: 'Bearer '+auth.getToken()}
+			});
     };
-    o.editRoute = function(id, route){
 
-      return $http.put('/routes/' + id, route );
-    }
+		o.editRoute = function(id, route){
+
+      return $http.put('/routes/' + id, route, {
+				headers: {Authorization: 'Bearer '+auth.getToken()}
+			});
+    };
 
     o.deleteRoute = function(id){
-      return $http.delete('/routes/' + id);
+      return $http.delete('/routes/' + id,{
+				headers: {Authorization: 'Bearer '+auth.getToken()}
+			});
     }
     o.getRoutesCount= function(airline){
        return airline.routes.length;
     };
+
+
 
     return o;
 
@@ -426,8 +510,8 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll',])
 
 
     }])
-    .controller('AirlineCtrl', ['$scope', '$state', 'airlineFactory','airline', 'airportsResolved',
-    function($scope, $state, airlineFactory, airline, airportsResolved){
+    .controller('AirlineCtrl', ['$scope', '$state', 'auth', 'airlineFactory','airline', 'airportsResolved',
+    function($scope, $state, auth, airlineFactory, airline, airportsResolved){
         $scope.airline=airline;
 
         $scope.airports = airportsResolved.data;
@@ -436,10 +520,12 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll',])
         $scope.isEditRouteVisible = false;
         $scope.editableRoute = {};
 
+
         $scope.activeLink = function(n) {
             return ($state.is(n) ? "active" : "");
         };
 
+				$scope.isLoggedIn = auth.isLoggedIn;
 
         $scope.tabBgColor = function(goToTab){
           if($state.current.data.activeTab === goToTab)
@@ -453,7 +539,7 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll',])
             if($scope.body === '') { return; }
             airlineFactory.addComment(airline._id, {
                 body: $scope.body,
-                author: 'Andrew',
+            //    author: 'Andrew',
                 upvotes: 0
             }).success(function( comment){
                 $scope.airline.comments.push(comment);
@@ -571,15 +657,15 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll',])
            };
     }])
 
-    .controller('RoutesCtrl',['$scope', 'routeFactory', 'routesResolved', 'airportsResolved', 'airlinesResolved',
-        function($scope, routeFactory, routesResolved, airportsResolved, airlinesResolved){
+    .controller('RoutesCtrl',['$scope', 'auth', 'routeFactory', 'routesResolved', 'airportsResolved', 'airlinesResolved',
+        function($scope, auth, routeFactory, routesResolved, airportsResolved, airlinesResolved){
             $scope.routes=routesResolved.data;
             $scope.airports = airportsResolved.data;
             $scope.airlines = airlinesResolved.data;
             $scope.isSearchResultsVisible = true;
             $scope.airlineFilters = [];
-
-
+						$scope.isLoggedIn = auth.isLoggedIn;
+						
             $scope.setAirlineFilter = function($event, airline){
               var id = airline._id;
               var checkbox = $event.target;
@@ -597,11 +683,35 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll',])
             };
 
         }])
+		.controller('AuthCtrl', [
+			'$scope',
+			'$state',
+			'auth',
+			function($scope, $state, auth){
+			  $scope.user = {};
+
+			  $scope.register = function(){
+			    auth.register($scope.user).error(function(error){
+			      $scope.error = error;
+			    }).then(function(){
+			      $state.go('home');
+			    });
+			  };
+
+			  $scope.logIn = function(){
+			    auth.logIn($scope.user).error(function(error){
+			      $scope.error = error;
+			    }).then(function(){
+			      $state.go('home');
+			    });
+			  };
+			}])
     .controller('NavCtrl', [
         '$scope',
         '$state',
         'airlineFactory',
-        function($scope, $state, airlineFactory){
+				'auth',
+        function($scope, $state, airlineFactory, auth){
             $scope.airlines = [];
             $scope.activeLink = function(n) {
                 return ($state.is(n) ? "active" : "");
@@ -613,28 +723,9 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll',])
               });
 
             };
-/*
-            $scope.toggled = function() {
-            //   if (open) {
-                 airlineFactory.getAll().success(function(airlines){
-                   $scope.airlines = airlines;
-                 });
-            //   }
-          };
-/*
-            $scope.airlines = [{name: 'United', link: 'http://united.com', ratings: 5,
-            comments:[{author: 'Andrew', body: 'Great service!', upvotes: 3},
-            {author: 'Michael', body: 'The best.', upvotes: 2}]},
-            {name: 'American', link: 'http://aa.com', ratings: 2,
-            comments:[{author: 'Tom', body: 'Not the best!', upvotes: 1},
-            {author: 'Michael', body: 'Needs work.', upvotes: 5},
-            {author: 'Andrew', body: 'Can do better.', upvotes: 1}]},
-            {name: 'Southwest', link: 'http://southwest.com', ratings: 1,
-            comments:[{author: 'Heather', body: 'Love Southwest!', upvotes: 8}]},
-            {name: 'JetBlue', link: 'http://jetblue.com', ratings: 20,
-            comments:[{author: 'Jane', body: 'Cable on flight!', upvotes: 3},
-            {author: 'Bill', body: 'Best wifi..', upvotes: 2},
-            {author: 'Andrew', body: 'Rough trip', upvotes: 3},
-            {author: 'Michael', body: 'Service was great.', upvotes: 2}]},
-            {name: 'Spirit', link: 'http://spirit.com', ratings: 1, comments: []}]; */
+
+					$scope.isLoggedIn = auth.isLoggedIn;
+  				$scope.currentUser = auth.currentUser;
+  				$scope.logOut = auth.logOut;
+
         }]);

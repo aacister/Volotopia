@@ -1,5 +1,9 @@
 var express = require('express');
+var passport = require('passport');
+var jwt = require('express-jwt');
+
 var router = express.Router();
+var auth = jwt({secret: 'SECRET', userProperty: 'payload'});
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -12,6 +16,7 @@ var Airline = mongoose.model('Airline');
 var Comment = mongoose.model('Comment');
 var Airport = mongoose.model('Airport');
 var Route = mongoose.model('Route');
+var User = mongoose.model('User');
 
 router.get('/airlines', function(req, res, next){
   Airline.find(function(err, airlines){
@@ -32,7 +37,7 @@ router.get('/airports', function(req, res, next){
 
 
 
-router.post('/airlines', function(req, res, next) {
+router.post('/airlines', auth, function(req, res, next) {
   var airline = new Airline(req.body);
 
   airline.save(function(err, airline){
@@ -102,7 +107,7 @@ req.airline.deepPopulate(['comments', 'routes', 'routes.arrivalAirport', 'routes
 });
 
 //uprate an airline
-router.put('/airlines/:airline/uprate', function(req, res, next){
+router.put('/airlines/:airline/uprate', auth,function(req, res, next){
   req.airline.uprate(function(err, airline){
     if(err){return next(err);}
 
@@ -111,10 +116,11 @@ router.put('/airlines/:airline/uprate', function(req, res, next){
 });
 
 // create a new comment
-router.post('/airlines/:airline/comments', function(req, res, next) {
+router.post('/airlines/:airline/comments', auth,function(req, res, next) {
   var comment = new Comment(req.body);
   comment.airline = req.airline;
-  comment.author = 'Andrew';
+  comment.author = req.payload.username;
+
 
   comment.save(function(err, comment){
     if(err){ return next(err); }
@@ -129,7 +135,7 @@ router.post('/airlines/:airline/comments', function(req, res, next) {
 });
 
 // upvote a comment
-router.put('/airlines/:airline/comments/:comment/upvote', function(req, res, next) {
+router.put('/airlines/:airline/comments/:comment/upvote', auth, function(req, res, next) {
   req.comment.upvote(function(err, comment){
     if (err) { return next(err); }
 
@@ -140,7 +146,7 @@ router.put('/airlines/:airline/comments/:comment/upvote', function(req, res, nex
 
 
 // create a new route
-router.post('/airlines/:airline/routes', function(req, res, next) {
+router.post('/airlines/:airline/routes', auth, function(req, res, next) {
   var route = new Route(req.body);
   route.airline = req.airline;
 
@@ -159,7 +165,7 @@ router.post('/airlines/:airline/routes', function(req, res, next) {
 });
 
 // edit a route
-router.put('/routes/:route', function(req, res, next) {
+router.put('/routes/:route', auth,function(req, res, next) {
   Route.findById(req.params.route,function (err, route) {
           if (err) res.send(err);
           if (req.body.price) route.price = req.body.price;
@@ -183,7 +189,7 @@ router.put('/routes/:route', function(req, res, next) {
 });
 
 // delete a route
-router.delete('/routes/:route', function(req, res, next){
+router.delete('/routes/:route', auth,function(req, res, next){
 
         Route.remove({
             _id: req.params.route
@@ -206,7 +212,38 @@ router.get('/routes', function(req, res, next){
   });
 });
 
+router.post('/register', function(req, res, next){
+  if(!req.body.username || !req.body.password){
+    return res.status(400).json({message: 'Please fill out all fields'});
+  }
 
+  var user = new User();
 
+  user.username = req.body.username;
+
+  user.setPassword(req.body.password)
+
+  user.save(function (err){
+    if(err){ return next(err); }
+
+    return res.json({token: user.generateJWT()})
+  });
+});
+
+router.post('/login', function(req, res, next){
+  if(!req.body.username || !req.body.password){
+    return res.status(400).json({message: 'Please fill out all fields'});
+  }
+
+  passport.authenticate('local', function(err, user, info){
+    if(err){ return next(err); }
+
+    if(user){
+      return res.json({token: user.generateJWT()});
+    } else {
+      return res.status(401).json(info);
+    }
+  })(req, res, next);
+});
 
 module.exports = router;
