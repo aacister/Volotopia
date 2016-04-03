@@ -4,8 +4,14 @@ mongoose.set('debug', true);
 var CommentSchema = new mongoose.Schema({
     body: String,
     author: String,
-    upvotes: {type: Number, default: 0},
-    airline: { type: mongoose.Schema.Types.ObjectId, ref: 'Airline' }
+    upvotes: {
+        type: Number,
+        default: 0
+    },
+    airline: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Airline'
+    }
 });
 
 CommentSchema.methods.upvote = function(cb) {
