@@ -1,4 +1,4 @@
-angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
+angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
     .constant('angularMomentConfig', {
         preprocess: 'utc'
     })
@@ -752,8 +752,8 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
         }
     ])
 
-.controller('RoutesCtrl', ['$scope', 'auth', 'airlineFactory', 'routeFactory', 'routesResolved', 'airportsResolved', 'airlinesResolved',
-    function($scope, auth, airlineFactory, routeFactory, routesResolved, airportsResolved, airlinesResolved) {
+.controller('RoutesCtrl', ['$scope', 'toaster','auth', 'airlineFactory', 'routeFactory', 'routesResolved', 'airportsResolved', 'airlinesResolved',
+    function($scope, toaster, auth, airlineFactory, routeFactory, routesResolved, airportsResolved, airlinesResolved) {
         $scope.routes = routesResolved.data;
         $scope.airports = airportsResolved.data;
         $scope.airlines = airlinesResolved.data;
@@ -761,12 +761,15 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
         $scope.airlineFilters = [];
         $scope.isLoggedIn = auth.isLoggedIn;
 
+
+
         $scope.setAirlineFilter = function($event, airline) {
             var id = airline._id;
             var checkbox = $event.target;
             var action = (checkbox.checked ? 'add' : 'remove');
             if (action == 'add' & $scope.airlineFilters.indexOf(id) == -1) $scope.airlineFilters.push(id);
             if (action == 'remove' && $scope.airlineFilters.indexOf(id) != -1) $scope.airlineFilters.splice($scope.airlineFilters.indexOf(id), 1);
+
 
         };
 
@@ -777,16 +780,14 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
                     return e._id != route._id;
                 });
                 $scope.routes.push(route);
-
+								//show success message with timer
+								toaster.pop('success.', "Success", "Booked!");
             });
         };
 
-        $scope.loadMore = function() {
-            var last = $scope.routes[$scope.routes.length - 1];
-            for (var i = 1; i <= $scope.routes.length; i++) {
-                $scope.routes.push(last + i);
-            }
-        };
+
+
+
 
     }
 ])

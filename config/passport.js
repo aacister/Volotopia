@@ -34,10 +34,10 @@ passport.use('local-login', new LocalStrategy({
 
              // if no user is found, return the message
              if (!user)
-                 return done(null, false, req.flash('loginMessage', 'No user found.'));
+                 return done(null, false, { message: 'No user found.' });
 
              if (!user.validPassword(password))
-                 return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
+                 return done(null, false, {message: 'Wrong password.'});
 
              // all is well, return user
              else
@@ -71,7 +71,7 @@ passport.use('local-login', new LocalStrategy({
 
              // check to see if there's already a user with that email
              if (existingUser)
-                 return done(null, false, req.flash('signupMessage', 'That username is already taken.'));
+                 return done(null, false, {message: 'That username is already taken.'});
 
              //  If we're logged in, we're connecting a new local account.
              if(req.user) {
@@ -94,8 +94,7 @@ passport.use('local-login', new LocalStrategy({
 
                  newUser.local.username    = username;
                  newUser.local.password = newUser.generateHash(password);
-                 console.log('username: ' + newUser.local.username);
-                 console.log('password: ' + newUser.local.password);
+
 
                  newUser.save(function(err) {
                      if (err)

@@ -256,11 +256,11 @@ router.delete('/user/:user/routes/:route', auth, function(req, res, next) {
             req.user.flights.id(route._id).remove();
             req.user.save(function(err) {
                 if (err) {
-                    console.log('Error: ' + err);
+
                     return next(err);
                 }
                 res.json({
-                    message: 'Deleted'
+                    message: 'Deleted successfully.'
                 });
             });
         });
@@ -275,15 +275,7 @@ router.put('/user/:user/routes/:route/book', auth, function(req, res, next) {
             if (err) {
                 return next(err);
             }
-            /*
-                        if (req.body.departureDateTime) bookedRoute.departureDateTime = req.body.departureDateTime;
-                        if(req.body.duration) bookedRoute.duration = req.body.duration;
-                        if(req.body.arrivalDateTime) bookedRoute.arrivalDateTime = req.body.arrivalDateTime;
-                        if(req.body.departureAirport.code) bookedRoute.departureAirport.code = req.body.departureAirport.code;
-                        if(req.body.arrivalAirport.code) bookedRoute.arrivalAirport.code = req.body.arrivalAirport.code;
-                        if(req.body.airline.title) bookedRoute.airline.title = req.body.airline.title;
-                        if (req.body.price) bookedRoute.price = req.body.price;
-            */
+
             //save flight to User
             req.user.flights.push({
                 _id: bookedRoute._id,
@@ -298,10 +290,9 @@ router.put('/user/:user/routes/:route/book', auth, function(req, res, next) {
 
             req.user.save(function(err, savedUser) {
                 if (err) {
-                    console.log('Error: ' + err);
                     return next(err);
                 }
-                console.log('Booked flight for user.');
+
                 bookedRoute.deepPopulate(['arrivalAirport', 'departureAirport', 'airline'], function(err, dBookedRoute) {
                     res.json(dBookedRoute);
                 });
@@ -317,11 +308,10 @@ router.delete('/routes/:route', auth, function(req, res, next) {
     Route.remove({
         _id: req.params.route
     }, function(err, route) {
-        if (err) return res.send(err);
+        if (err) return next(err);
 
-        //    res.status(200);
         res.json({
-            message: 'Deleted'
+            message: 'Deleted successfully.'
         });
     });
 
@@ -339,35 +329,7 @@ router.get('/routes', function(req, res, next) {
     });
 });
 
-// normal routes ===============================================================
 
-// PROFILE SECTION =========================
-/*
-	router.get('/profile', isLoggedIn, function(req, res) {
-		res.render('profile.ejs', {
-			user : req.user
-		});
-	});
-*/
-// LOGOUT ==============================
-/*
-	router.get('/logout', function(req, res) {
-		req.logout();
-		res.redirect('/');
-	});
-*/
-
-//authenticate
-// locally --------------------------------
-// LOGIN ===============================
-/*
-// show the login form
-router.get('/login', function(req, res) {
-    res.render('login.ejs', {
-        message: req.flash('loginMessage')
-    });
-});
-*/
 // process the login form
 router.post('/login', function(req, res, next) {
     passport.authenticate('local-login', function(err, user, info) {
@@ -388,15 +350,7 @@ router.post('/login', function(req, res, next) {
 
 
 
-// SIGNUP =================================
-/*
-// show the signup form
-router.get('/signup', function(req, res) {
-    res.render('signup.ejs', {
-        message: req.flash('loginMessage')
-    });
-});
-*/
+
 // process the signup form
 router.post('/register', function(req, res, next) {
 
@@ -424,170 +378,18 @@ router.get('/auth/google', passport.authenticate('google', {
 router.get('/auth/google/callback', function (req, res, next) {
     passport.authenticate('google', function (err, user, info) {
         if (err) {
-          console.log('Error: did not find user.');
           return next(err);
         }
 
         if (user) {
-
           res.redirect('/#/profile?token=' + user.generateGoogleJWT());
-      //      res.writeHead(302, {
-      //          'Location': 'http://localhost:3000/#/google?token=' + user.generateJWT()
-      //      });
-      //      res.end();
         } else {
             return res.status(401).json(info);
         }
     })(req, res, next);
 });
-/*
-router.get('/auth/google/callback', function(req, res, next) {
-    passport.authenticate('google', function(err, user, info) {
-        if (err) {
-            return next(err);
-        }
 
-        if (user) {
-            return res.json({
-                token: user.generateJWT()
-            });
-        } else {
-            return res.status(401).json(info);
-        }
-    })(req, res, next);
-}); */
-// the callback after google has authenticated the user
-/*
-router.get('/auth/google/callback',
-    passport.authenticate('google', {
-        successRedirect: '/',
-        failureRedirect: '/'
-    }));
-*/
-/*
-    router.get('/auth/google/callback',
-    	  passport.authenticate('google', { failureRedirect: '/#/login' }),
-    	  function(req, res) {
-    	    // Successful authentication, redirect home.
-    	    res.redirect('/#/profile');
-    	  });
 
-        router.get('/profile', isLoggedIn, function(req, res) {
-          res.render('account', { user: req.user });
-        res.render('profile.ejs', {
-            user : req.user // get the user out of session and pass to template
-        });
-    });
 
-    // route middleware to make sure a user is logged in
-function isLoggedIn(req, res, next) {
 
-    // if user is authenticated in the session, carry on
-    if (req.isAuthenticated())
-        return next();
-    else {
-      return next(new Error("Not Logged in."));
-    }
-
-    // if they aren't redirect them to the home page
-    res.redirect('/');
-}
-*/
-/*
-router.get('/auth/google/callback', function(req, res, next){
-  passport.authenticate('google',  function(err, user, info){
-    if (err) {
-        return res.status(200);
-    //    return next(err);
-    }
-//    return res.status(200);
-   return res.json({
-        token: user.generateGoogleJWT()
-    });
-  })(req, res, next);
-});
-*/
-//authorize
-// locally --------------------------------
-/*
-router.get('/connect/local', function(req, res) {
-    res.render('connect-local.ejs', {
-        message: req.flash('loginMessage')
-    });
-});
-*/
-router.post('/connect/local', passport.authenticate('local-signup', {
-    successRedirect: '/profile', // redirect to the secure profile section
-    failureRedirect: '/connect/local', // redirect back to the signup page if there is an error
-    failureFlash: true // allow flash messages
-}));
-
-//Google
-// send to google to do the authentication
-router.get('/connect/google', passport.authorize('google', {
-    scope: ['profile', 'email']
-}));
-
-// the callback after google has authorized the user
-router.get('/connect/google/callback',
-    passport.authorize('google', {
-        successRedirect: '/#/home',
-        failureRedirect: '/#/home'
-    }));
-
-/*
-// route middleware to ensure user is logged in
-function isLoggedIn(req, res, next) {
-    if (req.isAuthenticated())
-        return next();
-
-    res.redirect('/');
-} */
-/*
-router.post('/register', function(req, res, next) {
-    if (!req.body.username || !req.body.password) {
-        return res.status(400).json({
-            message: 'Please fill out all fields'
-        });
-    }
-
-    var user = new User();
-
-    user.username = req.body.username;
-
-    user.setPassword(req.body.password)
-
-    user.save(function(err) {
-        if (err) {
-            return next(err);
-        }
-
-        return res.json({
-            token: user.generateJWT()
-        })
-    });
-});
-
-router.post('/login', function(req, res, next) {
-    if (!req.body.username || !req.body.password) {
-        return res.status(400).json({
-            message: 'Please fill out all fields'
-        });
-    }
-
-    passport.authenticate('local', function(err, user, info) {
-        if (err) {
-            return next(err);
-        }
-
-        if (user) {
-            return res.json({
-                token: user.generateJWT()
-            });
-        } else {
-            return res.status(401).json(info);
-        }
-    })(req, res, next);
-});
-*/
 module.exports = router;
