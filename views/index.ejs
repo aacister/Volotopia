@@ -50,11 +50,13 @@
 
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li ng-show="isLoggedIn()"><a>{{ currentUser() }}</a></li>
+                <li ng-show="isLoggedIn()"><a href="">{{ currentUser() }}</a></li>
                 <li ng-show="isLoggedIn()"><a href="" ng-click="logOut()">Log Out</a></li>
                 <li ng-hide="isLoggedIn()"><a href="/#/register"><span class="glyphicon glyphicon-user"></span> Register</a></li>
                 <li class='divider'></li>
                 <li ng-hide="isLoggedIn()"><a href="/#/login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                <li class='divider'></li>
+                <li ng-hide="isLoggedIn()"><a href="/auth/google"><span class="fa fa-google-plus"></span> Google</a></li>
             </ul>
 
 
@@ -422,8 +424,8 @@
             <div class="container">
                 <div class="row">
 
-                  <div class="col-sm-1" style="margin-top: 5px; margin-left: 10px;">
-                          <span><button type="button" ng-click="deleteFlight(flight)" class="btn btn-danger">Delete</button>
+                    <div class="col-sm-1" style="margin-top: 5px; margin-left: 10px;">
+                        <span><button type="button" ng-click="deleteFlight(flight)" class="btn btn-danger">Delete</button>
 
                   </div>
                   <div class="col-sm-2" style="margin-top:2px">
@@ -433,30 +435,190 @@
                       </span>
                     </div>
                     <div style="margin-top:3px;">
-                                    <span style="font-size:15px; margin-left:10px;  color: rgba(0, 0, 0, 0.5);">
+                        <span style="font-size:15px; margin-left:10px;  color: rgba(0, 0, 0, 0.5);">
                                     {{flight.airline}}
                                   </span>
                     </div>
-                  </div>
-
-                  <div class="col-sm-8">
-                      <div>
-                          <span style="font-size:15px; ">{{flight.departureDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} (EST) </span><span style="left-margin:15px; font-weight: 800;color:navy;">{{flight.departureAirport}} </span>
-
-                          <span style="margin-left:5px"><i class="fa fa-long-arrow-right"></i></span>
-                      </div>
-                      <div>
-                          <span style="font-size:15px;">{{flight.arrivalDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'}} (EST) </span><span style="left-margin:15px;font-weight: 800; color:navy;">{{flight.arrivalAirport}}</span>
-                      </div>
-                      <div>
-                          <span style="font-size:15px;">duration: ~{{flight.duration | amDurationFormat : 'minute'}}</span>
-                      </div>
-                  </div>
                 </div>
-              </div>
+
+                <div class="col-sm-8">
+                    <div>
+                        <span style="font-size:15px; ">{{flight.departureDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} (EST) </span><span style="left-margin:15px; font-weight: 800;color:navy;">{{flight.departureAirport}} </span>
+
+                        <span style="margin-left:5px"><i class="fa fa-long-arrow-right"></i></span>
+                    </div>
+                    <div>
+                        <span style="font-size:15px;">{{flight.arrivalDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'}} (EST) </span><span style="left-margin:15px;font-weight: 800; color:navy;">{{flight.arrivalAirport}}</span>
+                    </div>
+                    <div>
+                        <span style="font-size:15px;">duration: ~{{flight.duration | amDurationFormat : 'minute'}}</span>
+                    </div>
+                </div>
             </div>
+        </div>
+        </div>
     </script>
 
+    <script type="text/ng-template" id="/connect-local.html">
+        <div class="container">
+            <div class="col-sm-6 col-sm-offset-3">
+
+                <h1><span class="fa fa-user"></span> Add Local Account</h1>
+
+
+                <form action="/connect/local" method="post">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="text" class="form-control" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" class="form-control" name="password">
+                    </div>
+
+                    <button type="submit" class="btn btn-warning btn-lg">Add Local</button>
+                </form>
+
+                <hr>
+
+                <p><a href="/profile">Go back to profile</a></p>
+
+            </div>
+        </div>
+    </script>
+    <script type="text/ng-template" id="/login.html">
+        <div class="container">
+        <div class="page-header text-center">
+              <h1><span class="fa fa-sign-in"></span> Login</h1>
+        </div>
+        <div class="row">
+            <div class="col-sm-5 ">
+
+                <div class="well" style="height: 250px;">
+
+                    <form ng-submit="logIn()">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" placeholder="Username" class="form-control" ng-model="user.username" name="username">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" placeholder="Password" class="form-control" ng-model="user.password" name="password">
+                        </div>
+
+                        <button type="submit" class="btn btn-warning btn-lg">Login</button>
+                    </form>
+
+
+                </div>
+            </div>
+            <div class="col-sm-2 text">
+              <table>
+              <tr style="height:50px"><td><td></tr>
+              <tr style="height:100px; "><td><i style="text-center; font-size: 125px;" class="fa fa-arrows-h"></i><td></tr>
+              <tr style="height:100px"><td><td></tr>
+              </table>
+            </div>
+            <div class="col-sm-5 ">
+                    <a href="/auth/google"><span class="fa fa-google-plus" style="font-size: 225px; padding-left:10px; padding-right:10px; background-color:#d8e6f3;"></span></a>
+            </div>
+            </div>
+            <hr>
+
+            <p class="text-center">Need an account?<a href="/#/register"> Register</a></p>
+        </div>
+    </script>
+    <script type="text/ng-template" id="/profile.html">
+        <div class="container">
+
+            <div class="page-header text-center">
+                <h1><span class="fa fa-anchor"></span> Profile Page</h1>
+            </div>
+
+            <div class="row">
+
+                <div class="col-sm-6 ">
+                    <div class="well">
+                        <h3><span class="fa fa-user"></span> Local</h3>
+                        <p>
+                            <strong>id</strong>: <span>{{user._id }}</span>
+                            <br>
+                            <strong>username</strong>:<span>{{user.local.username}}</span>
+                            <br>
+                            <strong>password</strong>: <span style="width:100px;word-wrap:break-word;">{{user.local.password}}</span>
+                        </p>
+                        <a href="/connect/local" class="btn btn-default">Connect Local</a>
+                    </div>
+                </div>
+
+
+                <div class="col-sm-6">
+                    <div class="well">
+                        <h3 class="text-danger"><span class="fa fa-google-plus"></span> Google+</h3>
+                        <p>
+                            <strong>id</strong>: {{user.google.id}}
+                            <br>
+                            <strong>token</strong>: {{user.google.token}}
+                            <br>
+                            <strong>email</strong>: {{user.google.email}}
+                            <br>
+                            <strong>name</strong>: {{user.google.name}}
+                        </p>
+
+                        <a href="/connect/google" class="btn btn-danger">Connect Google</a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/ng-template" id="/register.html">
+        <div class="container">
+            <div class="page-header text-center">
+                <h1><span class="glyphicon glyphicon-user"></span> Register</h1>
+            </div>
+            <div class="row">
+                <div class="col-sm-5 ">
+
+                    <div class="well" style="height: 250px;">
+
+                        <form ng-submit="register()">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" placeholder="Username" class="form-control" ng-model="user.username" name="username">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" placeholder="Password" class="form-control" ng-model="user.password" name="password">
+                            </div>
+
+                            <button type="submit" class="btn btn-warning btn-lg">Register</button>
+                        </form>
+
+
+                    </div>
+                </div>
+                <div class="col-sm-2 text">
+                  <table>
+                  <tr style="height:50px"><td><td></tr>
+                  <tr style="height:100px; "><td><i style="text-center; font-size: 125px;" class="fa fa-arrows-h"></i><td></tr>
+                  <tr style="height:100px"><td><td></tr>
+                  </table>
+                </div>
+                <div class="col-sm-5 ">
+
+                        <a href="/auth/google"><span class="fa fa-google-plus" style="font-size: 225px; padding-left:10px; padding-right:10px; background-color:#d8e6f3;"></span></a>
+
+
+                </div>
+            </div>
+            <hr>
+            <p class="text-center">Already have an account? <a href="/#/login">Login</a></p>
+
+
+        </div>
+    </script>
+    <!--
     <script type="text/ng-template" id="/register.html">
         <div class="page-header">
             <h1>Flapper News</h1>
@@ -500,6 +662,7 @@
             <button type="submit" class="btn btn-primary">Log In</button>
         </form>
     </script>
+  -->
 </body>
 
 </html>

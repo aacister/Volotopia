@@ -2,7 +2,8 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
     .constant('angularMomentConfig', {
         preprocess: 'utc'
     })
-    .config([
+
+.config([
         '$stateProvider',
         '$urlRouterProvider',
         function($stateProvider, $urlRouterProvider) {
@@ -118,6 +119,7 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
                         if (auth.isLoggedIn()) {
                             $state.go('home');
                         }
+
                     }]
                 })
                 .state('register', {
@@ -129,7 +131,46 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
                             $state.go('home');
                         }
                     }]
+                })
+                .state('google', {
+                    url: '/profile',
+                    templateUrl: '/profile.html',
+                    controller: 'AuthCtrl',
+                    onEnter: ['$state', 'auth', '$location', function($state, auth, $location) {
+                        if ($location.search().token) {
+                            auth.saveToken($location.search().token);
+                        }
+                        if (!auth.isLoggedIn()) {
+                            $state.go('login');
+                        }
+												else {
+													$state.go('home');
+												}
+
+
+                    }],
+										resolve: {
+                        userResolved: ['auth', function(auth) {
+                            return auth.getCurrentUser();
+                        }]
+                    }
+                })
+                .state('profile', {
+                    url: '/profile',
+                    templateUrl: '/profile.html',
+                    controller: 'ProfileCtrl',
+                    onEnter: ['$state', 'auth', function($state, auth) {
+                        if (!auth.isLoggedIn()) {
+                            $state.go('home');
+                        }
+                    }],
+                    resolve: {
+                        userResolved: ['auth', function(auth) {
+                            return auth.getCurrentUser();
+                        }]
+                    }
                 });
+
 
 
             $urlRouterProvider.otherwise('home');
@@ -202,12 +243,20 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
 
         auth.logOut = function() {
             $window.localStorage.removeItem('volotopia-token');
-            $state.go('home');
+            $state.go('login');
         };
 
+        auth.googleLogIn = function() {
+            return $http.get('/auth/google').success(function(data) {
+                auth.saveToken(data.token);
+            });
+
+
+        }
         return auth;
     }])
-    .factory('airlineFactory', ['$http', 'auth', function($http, auth) {
+
+.factory('airlineFactory', ['$http', 'auth', function($http, auth) {
         var o = {
             airlines: []
         };
@@ -515,7 +564,8 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
 
             $scope.test = "Volotopia is currently work in progress.  The site is modeled after a travel agency site, where a user can browse, and purchase airline flights. " +
                 "The site stands as a means to publish my work within the MEAN stack (Mongo, Express.js, Angular.js, Node.js). Volotopia is not to be viewed as a professional site, as it has been " +
-                "quickly designed and constructed for sharpening, and training my development skills.    It should be " +
+                "quickly designed and constructed for sharpening, and training my development skills. It will be refactored in near future to include custom directives, and usage of different techniches " +
+								" of transitioning state b/w controllers, i.e. a state service and/or $emit and $broadcasts.  It should be " +
                 "noted, the site exists mainly to show function, and I do not profess to be a designer.  That being said, it is desired, at completion, to have the application scaled to multiple screens, whether mobile or desktop, using bootstrap. ";
             $scope.signature = "-- Andrew A. Cisternino";
             /*         "\n Lorem ipsum dolor sit amet, mea id velit civibus consetetur, ad nobis eruditi vix, putant nusquam eum at. In esse eius facilis has, vim ad mentitum urbanitas. Vis at saperet praesent, mei propriae suavitate no, eu sit falli constituam. Viris assueverit mediocritatem pro cu, eum viris iriure electram ex. An falli exerci his, sea modo dictas facilisis te." +
@@ -761,14 +811,17 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
         '$scope',
         '$state',
         'auth',
+
         function($scope, $state, auth) {
+
             $scope.user = {};
+
 
             $scope.register = function() {
                 auth.register($scope.user).error(function(error) {
                     $scope.error = error;
                 }).then(function() {
-                    $state.go('home');
+                    $state.go('profile');
                 });
             };
 
@@ -776,9 +829,23 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
                 auth.logIn($scope.user).error(function(error) {
                     $scope.error = error;
                 }).then(function() {
-                    $state.go('home');
+                    $state.go('profile');
                 });
             };
+
+
+
+        }
+    ])
+    .controller('ProfileCtrl', [
+        '$scope',
+        '$state',
+        'auth',
+        'userResolved',
+        function($scope, $state, auth, userResolved) {
+
+            $scope.user = userResolved;
+
         }
     ])
     .controller('NavCtrl', [
@@ -797,6 +864,14 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'infinite-scroll', ])
                     $scope.airlines = airlines;
                 });
 
+            };
+
+            $scope.googleLogIn = function() {
+                auth.googleLogIn().error(function(error) {
+                    $scope.error = error;
+                }).then(function() {
+                    $state.go('profile');
+                });
             };
 
             $scope.isLoggedIn = auth.isLoggedIn;
