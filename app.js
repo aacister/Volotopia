@@ -12,10 +12,13 @@ var session      = require('express-session');
 
 moment().tz("America/New_York").format();
 mongoose.set('debug', true);
-mongoose.connect('mongodb://localhost/Volotopia', function(err) {
+mongoose.connect('mongodb://aacister:password123@ds015710.mlab.com:15710/heroku_0rshl2vd', function(err){
+  if(err) throw err;
+});
+/*mongoose.connect('mongodb://localhost/Volotopia', function(err) {
     if (err) throw err;
 });
-
+*/
 require('./models/Airlines');
 require('./models/Comments');
 require('./models/Airports');
