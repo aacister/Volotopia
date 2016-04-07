@@ -25,23 +25,14 @@ var User = mongoose.model('User');
 
 router.get('/airlines', function(req, res, next) {
 
-  Airline.find().deepPopulate(['comments', 'routes']).exec(function(err, airlines) {
-      if (err) {
-          return next(err);
-      }
-      res.json(airlines);
-
-  });
-  /*
-    Airline.find(function(err, airlines) {
+    Airline.find().deepPopulate(['comments', 'routes', 'routes.departureAirport', 'routes.arrivalAirport', 'routes.airline']).exec(function(err, airlines) {
         if (err) {
             return next(err);
         }
-        airlines.deepPopulate(['comments', 'routes'], function(err, deepAirlines) {
-            res.json(deepAirlines);
-        });
+        res.json(airlines);
 
-    }); */
+    });
+
 });
 
 // get all airports
@@ -64,8 +55,10 @@ router.post('/airlines', auth, function(req, res, next) {
         if (err) {
             return next(err);
         }
+        airline.deepPopulate(['comments', 'routes', 'routes.departureAirport', 'routes.arrivalAirport', 'routes.airline'], function(err, airline) {
+            res.json(airline);
+        });
 
-        res.json(airline);
     });
 });
 
@@ -157,7 +150,7 @@ router.get('/users/:user', function(req, res, next) {
 //return an airline
 router.get('/airlines/:airline', function(req, res, next) {
 
-    req.airline.deepPopulate(['comments', 'routes', 'routes.arrivalAirport', 'routes.departureAirport'], function(err, airline) {
+    req.airline.deepPopulate(['comments', 'routes', 'routes.departureAirport', 'routes.arrivalAirport', 'routes.airline'], function(err, airline) {
         res.json(airline);
     });
 
@@ -170,8 +163,10 @@ router.put('/airlines/:airline/uprate', auth, function(req, res, next) {
         if (err) {
             return next(err);
         }
+        airline.deepPopulate(['comments', 'routes', 'routes.departureAirport', 'routes.arrivalAirport', 'routes.airline'], function(err, airline) {
+            res.json(airline);
+        });
 
-        res.json(airline);
     });
 });
 
@@ -226,7 +221,7 @@ router.post('/airlines/:airline/routes', auth, function(req, res, next) {
             if (err) {
                 return next(err);
             }
-            route.deepPopulate(['arrivalAirport', 'departureAirport'], function(err, route) {
+            route.deepPopulate(['arrivalAirport', 'departureAirport',  'airline'], function(err, route) {
                 res.json(route);
             });
 
@@ -248,7 +243,7 @@ router.put('/routes/:route', auth, function(req, res, next) {
         if (req.body.duration) route.duration = req.body.duration;
         route.save(function(err, savedRoute) {
             if (err) send(err);
-            savedRoute.deepPopulate(['arrivalAirport', 'departureAirport'], function(err, route) {
+            savedRoute.deepPopulate(['arrivalAirport', 'departureAirport', 'airline'], function(err, route) {
                 res.json(route);
             });
         });
@@ -386,14 +381,14 @@ router.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));
 
-router.get('/auth/google/callback', function (req, res, next) {
-    passport.authenticate('google', function (err, user, info) {
+router.get('/auth/google/callback', function(req, res, next) {
+    passport.authenticate('google', function(err, user, info) {
         if (err) {
-          return next(err);
+            return next(err);
         }
 
         if (user) {
-          res.redirect('/#/profile?token=' + user.generateGoogleJWT());
+            res.redirect('/#/profile?token=' + user.generateGoogleJWT());
         } else {
             return res.status(401).json(info);
         }

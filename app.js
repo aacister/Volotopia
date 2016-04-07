@@ -14,10 +14,10 @@ moment().tz("America/New_York").format();
 mongoose.set('debug', true);
 mongoose.connect('mongodb://aacister:password123@ds015760.mlab.com:15760/heroku_8kqk50d6', function(err){
   if(err) throw err;
-}); 
+});
 /*mongoose.connect('mongodb://localhost/Volotopia', function(err) {
     if (err) throw err;
-}); */
+});*/
 
 require('./models/Airlines');
 require('./models/Comments');
