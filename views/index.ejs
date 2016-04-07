@@ -101,7 +101,7 @@
     </script>
     <script type="text/ng-template" id="/airlines.html">
 
-
+    
 
         <div ng-repeat="airline in airlines | orderBy: 'title'">
 
@@ -177,7 +177,7 @@
     </script>
 
     <script type="text/ng-template" id="/airlineRoutes.html">
-
+    <toaster-container toaster-options="{'time-out': 3000, 'position-class': 'toast-top-center','close-button':true}"></toaster-container>
         <div style="margin-top:15px;" ng-repeat="route in airline.routes | orderBy: 'departureDateTime'">
 
             <div class="container">

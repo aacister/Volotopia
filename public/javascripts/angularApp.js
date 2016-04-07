@@ -19,7 +19,7 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                     controller: 'AirlinesCtrl',
                     resolve: {
                         airlinesResolved: ['airlineFactory', function(airlineFactory) {
-                            return airlineFactory.getAll();
+                            return airline.getAll();
                         }]
                     }
                 })
@@ -42,9 +42,6 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                 resolve: {
                     airline: ['$stateParams', 'airlineFactory', function($stateParams, airlineFactory) {
                         return airlineFactory.get($stateParams.id);
-                    }],
-                    airportsResolved: ['airportFactory', function(airportFactory) {
-                        return airportFactory.getAll();
                     }]
                 }
             })
@@ -60,9 +57,6 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                 resolve: {
                     airline: ['$stateParams', 'airlineFactory', function($stateParams, airlineFactory) {
                         return airlineFactory.get($stateParams.id);
-                    }],
-                    airportsResolved: ['airportFactory', function(airportFactory) {
-                        return airportFactory.getAll();
                     }]
                 }
             })
@@ -78,9 +72,6 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                 resolve: {
                     airline: ['$stateParams', 'airlineFactory', function($stateParams, airlineFactory) {
                         return airlineFactory.get($stateParams.id);
-                    }],
-                    airportsResolved: ['airportFactory', function(airportFactory) {
-                        return airportFactory.getAll();
                     }]
                 }
             })
@@ -90,12 +81,7 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                     templateUrl: '/routes.html',
                     controller: 'RoutesCtrl',
                     resolve: {
-                        routesResolved: ['routeFactory', function(routeFactory) {
-                            return routeFactory.getAll();
-                        }],
-                        airportsResolved: ['airportFactory', function(airportFactory) {
-                            return airportFactory.getAll();
-                        }],
+
                         airlinesResolved: ['airlineFactory', function(airlineFactory) {
                             return airlineFactory.getAll();
                         }]
@@ -142,14 +128,13 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                         }
                         if (!auth.isLoggedIn()) {
                             $state.go('login');
+                        } else {
+                            $state.go('home');
                         }
-												else {
-													$state.go('home');
-												}
 
 
                     }],
-										resolve: {
+                    resolve: {
                         userResolved: ['auth', function(auth) {
                             return auth.getCurrentUser();
                         }]
@@ -176,6 +161,188 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
             $urlRouterProvider.otherwise('home');
         }
     ])
+    .run(['airportService', 'routeService', 'airlineService', function(airportService, routeService, airlineService) {
+        airportService.initializeAirports();
+        routeService.initializeRoutes();
+        airlineService.initializeAirlines();
+
+    }])
+    .service('airportService', ['$rootScope', '$http', '$q', function($rootScope, $http, $q) {
+        var service = {
+            airports: [],
+            initializeAirports: function() {
+                var deferred = $q.defer();
+                $http.get('/airports').success(function(data) {
+                    angular.copy(data, service.airports);
+                    $rootScope.$broadcast('airports.update');
+                    deferred.resolve(service.airports);
+                }).error(function(msg, code) {
+                    deferred.reject(msg);
+                });
+
+                return deferred.promise;
+
+
+            }
+        }
+        return service;
+    }])
+    .service('airlineService', ['$rootScope', '$http', '$q', 'auth', function($rootScope, $http, $q, auth) {
+        var service = {
+            airlines: [],
+            initializeAirlines: function() {
+                var deferred = $q.defer();
+                $http.get('/airlines').success(function(data) {
+                    angular.copy(data, service.airlines);
+                    $rootScope.$broadcast('airlines.update');
+                    deferred.resolve(service.airlines);
+                }).error(function(msg, code) {
+                    deferred.reject(msg);
+                });
+
+                return deferred.promise;
+
+            },
+            addAirlineRoute: function(id, route) {
+                var deferred = $q.defer();
+                var currentAirlines = $.grep(service.airlines, function(e) {
+                    return e._id == id;
+                });
+                var currentAirline = currentAirlines[0];
+                $http.post('/airlines/' + id + '/routes', route, {
+                    headers: {
+                        Authorization: 'Bearer ' + auth.getToken()
+                    }
+                }).success(function(route) {
+                    currentAirline.routes.push(route);
+                    service.airlines = $.grep(service.airlines, function(e) {
+                        return e._id != currentAirline._id;
+                    });
+                    service.airlines.push(currentAirline);
+                    $rootScope.$broadcast('airlines.update');
+                    deferred.resolve(route);
+                }).error(function(msg, code) {
+                    deferred.reject(msg);
+                });
+
+                return deferred.promise;
+
+            },
+
+            editAirlineRoute: function(id, route) {
+                var deferred = $q.defer();
+                var currentAirlines = $.grep(service.airlines, function(e) {
+                    return e._id == id;
+                });
+								var currentAirline = currentAirlines[0];
+                var editedAirlineRoutes = $.grep(currentAirline.routes, function(e) {
+                    return e._id == route._id;
+                });
+								var editedAirlineRoute = editedAirlineRoutes[0];
+                $http.put('/routes/' + route._id, route, {
+                    headers: {
+                        Authorization: 'Bearer ' + auth.getToken()
+                    }
+                }).success(function(route) {
+                    currentAirlineRoutes = $.grep(currentAirline.routes, function(e) {
+                        return e._id != editedAirlineRoute._id;
+                    });
+                    currentAirline.routes = currentAirlineRoutes;
+                    //add edited route
+                    currentAirline.routes.push(route);
+										service.airlines = $.grep(service.airlines, function(e) {
+                        return e._id != currentAirline._id;
+                    });
+                    service.airlines.push(currentAirline);
+
+                    $rootScope.$broadcast('airlines.update');
+                    deferred.resolve(route);
+                }).error(function(msg, code) {
+                    deferred.reject(msg);
+                });
+
+                return deferred.promise;
+            },
+
+            deleteAirlineRoute: function(route) {
+                var deferred = $q.defer();
+                var currentAirlines = $.grep(service.airlines, function(e) {
+                    return e._id == route.airline;
+                });
+                var currentAirline = currentAirlines[0];
+                var deletedAirlineRoutes = $.grep(currentAirline.routes, function(e) {
+                    return e._id == route._id;
+                });
+                var deletedAirlineRoute = deletedAirlineRoutes[0];
+                $http.delete('/routes/' + route._id, {
+                    headers: {
+                        Authorization: 'Bearer ' + auth.getToken()
+                    }
+                }).success(function(msg) {
+                    var currentAirlineRoutes = $.grep(currentAirline.routes, function(e) {
+                        return e._id != deletedAirlineRoute._id;
+                    });
+                    currentAirline.routes = currentAirlineRoutes;
+                    service.airlines = $.grep(service.airlines, function(e) {
+                        return e._id != currentAirline._id;
+                    });
+                    service.airlines.push(currentAirline);
+                    deferred.resolve(route);
+										$rootScope.$broadcast('airlines.update');
+                }).error(function(msg, code) {
+                    deferred.reject(msg);
+                });
+
+                return deferred.promise;
+            }
+
+
+        };
+        return service;
+    }])
+    .service('routeService', ['$rootScope', '$http', '$q', 'auth', function($rootScope, $http, $q, auth) {
+        var service = {
+
+            routes: [],
+
+            initializeRoutes: function() {
+                var deferred = $q.defer();
+                $http.get('/routes').success(function(data) {
+                    angular.copy(data, service.routes);
+                    $rootScope.$broadcast('routes.update');
+                    deferred.resolve(service.routes);
+                }).error(function(msg, code) {
+                    deferred.reject(msg);
+                });
+
+                return deferred.promise;
+
+            },
+
+            bookRoute: function(userId, route) {
+                var deferred = $q.defer();
+                $http.put('/user/' + userId + '/routes/' + route._id + '/book', route, {
+                    headers: {
+                        Authorization: 'Bearer ' + auth.getToken()
+                    }
+                }).success(function(route) {
+                    service.routes = $.grep(service.routes, function(e) {
+                        return e._id != route._id;
+                    });
+                    service.routes.push(route);
+                    $rootScope.$broadcast('routes.update');
+                    deferred.resolve(route);
+                }).error(function(msg, code) {
+                    deferred.reject(msg);
+                });
+
+                return deferred.promise;
+
+            }
+
+        }
+        return service;
+    }])
     .factory('auth', ['$http', '$window', '$state', function($http, $window, $state) {
         var auth = {};
         auth.saveToken = function(token) {
@@ -257,167 +424,79 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
     }])
 
 .factory('airlineFactory', ['$http', 'auth', function($http, auth) {
-        var o = {
-            airlines: []
-        };
-        /*
-         {name: 'United', link: 'http://united.com', ratings: 5,
-         comments:[{author: 'Andrew', body: 'Great service!', upvotes: 3},
-         {author: 'Michael', body: 'The best.', upvotes: 2}]},
-         {name: 'American', link: 'http://aa.com', ratings: 2,
-         comments:[{author: 'Tom', body: 'Not the best!', upvotes: 1},
-         {author: 'Michael', body: 'Needs work.', upvotes: 5},
-         {author: 'Andrew', body: 'Can do better.', upvotes: 1}]},
-         {name: 'Southwest', link: 'http://southwest.com', ratings: 1,
-         comments:[{author: 'Heather', body: 'Love Southwest!', upvotes: 8}]},
-         {name: 'JetBlue', link: 'http://jetblue.com', ratings: 20,
-         comments:[{author: 'Jane', body: 'Cable on flight!', upvotes: 3},
-         {author: 'Bill', body: 'Best wifi..', upvotes: 2},
-         {author: 'Andrew', body: 'Rough trip', upvotes: 3},
-         {author: 'Michael', body: 'Service was great.', upvotes: 2}]},
-         {name: 'Spirit', link: 'http://spirit.com', ratings: 1, comments: []}
-    }; */
+    var o = {
+        airlines: []
+    };
 
-        o.get = function(id) {
+    o.get = function(id) {
 
-            return $http.get('/airlines/' + id).then(function(res) {
-                return res.data;
-            });
+        return $http.get('/airlines/' + id).then(function(res) {
+            return res.data;
+        });
 
-        };
+    };
 
 
 
-        o.getAll = function() {
-            return $http.get('/airlines').success(function(data) {
-                angular.copy(data.data, o.airlines);
-            });
-        };
+    o.getAll = function() {
+        return $http.get('/airlines').success(function(data) {
+            angular.copy(data.data, o.airlines);
+        });
+    };
 
-        o.incrementRatings = function(airline) {
-            return $http.put('/airlines/' + airline._id + '/uprate', null, {
-                headers: {
-                    Authorization: 'Bearer ' + auth.getToken()
-                }
-            }).success(function(data) {
-                airline.ratings += 1;
-            });
-        };
+    o.incrementRatings = function(airline) {
+        return $http.put('/airlines/' + airline._id + '/uprate', null, {
+            headers: {
+                Authorization: 'Bearer ' + auth.getToken()
+            }
+        }).success(function(data) {
+            airline.ratings += 1;
+        });
+    };
 
-        o.getCommentsCount = function(airline) {
-            return airline.comments.length;
-
-
-        };
+    o.getCommentsCount = function(airline) {
+        return airline.comments.length;
 
 
+    };
 
-        o.upvoteComment = function(airline, comment) {
+    o.upvoteComment = function(airline, comment) {
 
-            return $http.put('/airlines/' + airline._id + '/comments/' + comment._id + '/upvote', null, {
-                headers: {
-                    Authorization: 'Bearer ' + auth.getToken()
-                }
-            }).success(function(data) {
-                comment.upvotes += 1;
-            });
-        };
+        return $http.put('/airlines/' + airline._id + '/comments/' + comment._id + '/upvote', null, {
+            headers: {
+                Authorization: 'Bearer ' + auth.getToken()
+            }
+        }).success(function(data) {
+            comment.upvotes += 1;
+        });
+    };
 
-        o.addComment = function(id, comment) {
-            return $http.post('/airlines/' + id + '/comments', comment, {
-                headers: {
-                    Authorization: 'Bearer ' + auth.getToken()
-                }
-            })
-        };
+    o.addComment = function(id, comment) {
+        return $http.post('/airlines/' + id + '/comments', comment, {
+            headers: {
+                Authorization: 'Bearer ' + auth.getToken()
+            }
+        })
+    };
 
-        o.addRoute = function(id, route) {
-            return $http.post('/airlines/' + id + '/routes', route, {
-                headers: {
-                    Authorization: 'Bearer ' + auth.getToken()
-                }
-            });
-        };
+    o.getRoutesCount = function(airline) {
+        return airline.routes.length;
+    };
 
-        o.editRoute = function(id, route) {
+    o.deleteFlight = function(userId, routeId) {
+        return $http.delete('/user/' + userId + '/routes/' + routeId, {
+            headers: {
+                Authorization: 'Bearer ' + auth.getToken()
+            }
+        });
+    }
 
-            return $http.put('/routes/' + id, route, {
-                headers: {
-                    Authorization: 'Bearer ' + auth.getToken()
-                }
-            });
-        };
+    return o;
 
-        o.deleteRoute = function(id) {
-            return $http.delete('/routes/' + id, {
-                headers: {
-                    Authorization: 'Bearer ' + auth.getToken()
-                }
-            });
-        }
-        o.getRoutesCount = function(airline) {
-            return airline.routes.length;
-        };
+}])
 
-        o.bookRoute = function(id, route) {
-
-            return $http.put('/user/' + id + '/routes/' + route._id + '/book', route, {
-                headers: {
-                    Authorization: 'Bearer ' + auth.getToken()
-                }
-            });
-        };
-
-        o.deleteFlight = function(userId, routeId) {
-            return $http.delete('/user/' + userId + '/routes/' + routeId, {
-                headers: {
-                    Authorization: 'Bearer ' + auth.getToken()
-                }
-            });
-        }
-
-        return o;
-
-    }])
-    .factory('airportFactory', ['$http', function($http) {
-        var o = {
-            airports: []
-        };
-
-        o.getAll = function() {
-            return $http.get('/airports').success(function(data) {
-                angular.copy(data.data, o.airports);
-            });
-        };
-
-        return o;
-    }])
-    .factory('routeFactory', ['$http', function($http) {
-        var o = {
-            routes: []
-        };
-
-        o.get = function(id) {
-
-            return $http.get('/routes/' + id).then(function(res) {
-                return res.data;
-            });
-
-        };
-
-        o.getAll = function() {
-            return $http.get('/routes').success(function(data) {
-                angular.copy(data.data, o.routes);
-            });
-        };
-
-
-
-
-        return o;
-    }])
-    //filter on to, from, date
-    .filter('routeSearch', [function() {
+//filter on to, from, date
+.filter('routeSearch', [function() {
         return function(data, from, to, departDate, airlines) {
             var output = [];
             if (!!to && !!from && !!departDate && airlines.length > 0) {
@@ -559,36 +638,23 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
     }])
     .controller('MainCtrl', [
         '$scope',
-        'airlineFactory',
-        function($scope, airlineFactory) {
-
+        'airlineService',
+        function($scope, airlineService) {
+            $scope.airlines = airlineService.airlines;
             $scope.test = "Volotopia is currently work in progress.  The site is modeled after a travel agency site, where a user can browse, and purchase airline flights. " +
                 "The site stands as a means to publish my work within the MEAN stack (Mongo, Express.js, Angular.js, Node.js). Volotopia is not to be viewed as a professional site, as it has been " +
-                "quickly designed and constructed for sharpening, and training my development skills. It will be refactored in near future to include custom directives, and usage of different techniches " +
-								" of transitioning state b/w controllers, i.e. a state service and/or $emit and $broadcasts.  It should be " +
+                "quickly designed and constructed for sharpening, and training my development skills. It is currently being refactored to include custom directives, and  " +
+                " usage of state data services utilizing angular's $broadcast and $emit features, along with event handlers.  It should be " +
                 "noted, the site exists mainly to show function, and I do not profess to be a designer.  That being said, it is desired, at completion, to have the application scaled to multiple screens, whether mobile or desktop, using bootstrap. ";
             $scope.signature = "-- Andrew A. Cisternino";
-            /*         "\n Lorem ipsum dolor sit amet, mea id velit civibus consetetur, ad nobis eruditi vix, putant nusquam eum at. In esse eius facilis has, vim ad mentitum urbanitas. Vis at saperet praesent, mei propriae suavitate no, eu sit falli constituam. Viris assueverit mediocritatem pro cu, eum viris iriure electram ex. An falli exerci his, sea modo dictas facilisis te." +
 
-                "Id has nonumy adversarium ullamcorper. Ut qui assentior cotidieque eloquentiam, vix dico detracto an. Cu has autem ornatus meliore. Eu vix sanctus patrioque, porro adipisci consetetur has an. Te per dolore regione definiebas, at corpora mediocritatem cum. " +
-
-                "Eam vero epicuri no, ex usu ridens comprehensam concludaturque. Et ius nominati necessitatibus, modo liber veritus ut his. Ea pri esse saepe antiopam. Nostro appareat ius ne. Sed elit instructior no, quando mediocrem expetenda mea et. " +
-
-                "Putant dissentiet ex eos. Quis primis has ea, no nullam saperet meliore quo. Epicurei convenire eu pri, cu wisi velit nihil quo, eum ut nostrud aliquid moderatius. Torquatos repudiandae usu at, cu omnis laoreet intellegebat has, mundi complectitur ut duo. Ea consul vivendo vel. " +
-
-                "Pertinacia adipiscing eu ius, ex cum epicurei consequuntur. Te mundi oporteat his, sit ut nostro assentior, at eos dicta eripuit referrentur. Te atqui etiam vix, eu pri hinc elitr. At scripta hendrerit sea, id nisl novum habemus duo, at tation nostrud dolorum vis. Eum cu omnes habemus voluptua, quo error errem necessitatibus ea.";
-*/
-            $scope.airlines = function() {
-                var allAirlines = airlineFactory.getAll();
-                return allAirlines;
-            };
         }
 
 
     ])
-    .controller('AirlinesCtrl', ['$scope', 'airlineFactory', 'airlinesResolved',
-        function($scope, airlineFactory, airlinesResolved) {
-            $scope.airlines = airlinesResolved.data;
+    .controller('AirlinesCtrl', ['$scope', 'airlineFactory', 'airlineService',
+        function($scope, airlineFactory, airlineService) {
+            $scope.airlines = airlineService.airlines;
 
             $scope.incrementRatings = function(airline) {
                 airlineFactory.incrementRatings(airline);
@@ -601,16 +667,29 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
 
         }
     ])
-    .controller('AirlineCtrl', ['$scope', '$state', 'auth', 'airlineFactory', 'airline', 'airportsResolved',
-        function($scope, $state, auth, airlineFactory, airline, airportsResolved) {
+    .controller('AirlineCtrl', ['$scope', '$state', 'auth', 'toaster', 'airlineService', 'airlineFactory', 'airline', 'airportService',
+        function($scope, $state, auth, toaster, airlineService, airlineFactory, airline, airportService) {
             $scope.airline = airline;
 
-            $scope.airports = airportsResolved.data;
+            $scope.airports = airportService.airports;
             $scope.isAddComment = false;
             $scope.isAddRouteVisible = false;
             $scope.isEditRouteVisible = false;
             $scope.editableRoute = {};
 
+            $scope.$on('airlines.update', function(event) {
+                //Update $scope.airline
+
+                    var currentAirlineId = $scope.airline._id;
+                    var airlines = $.grep(airlineService.airlines, function(e) {
+                        return e._id == currentAirlineId;
+                    });
+										$scope.airline = airlines[0];
+            });
+
+            $scope.$on('airports.update', function(event) {
+                $scope.airports = airportService.routes;
+            });
 
             $scope.activeLink = function(n) {
                 return ($state.is(n) ? "active" : "");
@@ -676,7 +755,7 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
 
                 var duration = getDuration($scope.departureDateTime, $scope.arrivalDateTime);
 
-                airlineFactory.addRoute(airline._id, {
+                airlineService.addAirlineRoute(airline._id, {
                     departureAirport: $scope.departureAirport,
                     departureDateTime: $scope.departureDateTime,
                     duration: duration,
@@ -685,18 +764,22 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                     price: $scope.price,
                     occupied: $scope.occupied,
                     capacity: $scope.capacity
-                }).success(function(route) {
-                    $scope.airline.routes.push(route);
-                });
-                $scope.departureAirport = '';
-                $scope.departureDateTime = '';
-                $scope.duration = '';
-                $scope.arrivalAirport = '';
-                $scope.arrivalDateTime = '';
-                $scope.price = '';
-                $scope.occupied = '';
-                $scope.capacity = '';
-                $scope.isAddRouteVisible = false;
+                }).then(function(route) {
+                        $scope.departureAirport = '';
+                        $scope.departureDateTime = '';
+                        $scope.duration = '';
+                        $scope.arrivalAirport = '';
+                        $scope.arrivalDateTime = '';
+                        $scope.price = '';
+                        $scope.occupied = '';
+                        $scope.capacity = '';
+                        $scope.isAddRouteVisible = false;
+                        toaster.pop('success.', "Success", "Route Added!");
+                    },
+                    function(error) {
+                        toaster.pop('error', "Error", error);
+                    });
+
             };
 
             $scope.showAddRoute = function() {
@@ -716,12 +799,6 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
 
             $scope.showEditRoute = function(route) {
                 $scope.isEditRouteVisible = true;
-
-                //      var departDate = new Date(route.departureDateTime);
-                //      var arriveDate = new Date(route.arrivalDateTime);
-                //      route.departureDateTime =  departDate;
-                //      route.arrivalDateTime = moment(arriveDate, "MM/DD/YYYY");
-                //        route.departureDateTime = moment(new Date(2014, 3, 19)).format('MM/DD/YYYY');
                 $scope.editableRoute = angular.copy(route);
 
             };
@@ -729,39 +806,43 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
             $scope.saveRoute = function() {
                 var duration = getDuration($scope.editableRoute.departureDateTime, $scope.editableRoute.arrivalDateTime);
                 $scope.editableRoute.duration = duration;
-                airlineFactory.editRoute($scope.editableRoute._id, $scope.editableRoute)
-                    .success(function(route) {
-                        airline.routes = $.grep(airline.routes, function(e) {
-                            return e._id != route._id;
-                        });
-                        airline.routes.push(route);
-
+                airlineService.editAirlineRoute($scope.airline._id, $scope.editableRoute)
+                    .then(function(route) {
+                        toaster.pop('success', "Success", "Route edited.");
+                    }, function(error) {
+                        toaster.pop('error', "Error", error);
                     });
                 $scope.editableRoute = {};
                 $scope.isEditRouteVisible = false;
             };
 
             $scope.deleteRoute = function(route) {
-                airlineFactory.deleteRoute(route._id).success(function() {
-                    airline.routes = $.grep(airline.routes, function(e) {
-                        return e._id != route._id;
-                    });
-
-                });
+                airlineService.deleteAirlineRoute(route).then(function() {
+									toaster.pop('success', "Success", "Deleted!");
+							},
+							function(error) {
+									toaster.pop('error', "Error", error);
+							});
             };
         }
     ])
 
-.controller('RoutesCtrl', ['$scope', 'toaster','auth', 'airlineFactory', 'routeFactory', 'routesResolved', 'airportsResolved', 'airlinesResolved',
-    function($scope, toaster, auth, airlineFactory, routeFactory, routesResolved, airportsResolved, airlinesResolved) {
-        $scope.routes = routesResolved.data;
-        $scope.airports = airportsResolved.data;
+.controller('RoutesCtrl', ['$scope', '$state', 'toaster', 'auth', 'airlineFactory', 'routeService', 'airportService', 'airlinesResolved',
+    function($scope, $state, toaster, auth, airlineFactory, routeService, airportService, airlinesResolved) {
+        $scope.routes = routeService.routes;
+        $scope.airports = airportService.airports;
         $scope.airlines = airlinesResolved.data;
         $scope.isSearchResultsVisible = true;
         $scope.airlineFilters = [];
         $scope.isLoggedIn = auth.isLoggedIn;
 
+        $scope.$on('routes.update', function(event) {
+            $scope.routes = routeService.routes;
+        });
 
+        $scope.$on('airports.update', function(event) {
+            $scope.airports = airportService.airports;
+        })
 
         $scope.setAirlineFilter = function($event, airline) {
             var id = airline._id;
@@ -774,20 +855,14 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
         };
 
         $scope.bookFlight = function(route) {
-            airlineFactory.bookRoute(auth.currentUserId(), route).success(function(route) {
-
-                $scope.routes = $.grep($scope.routes, function(e) {
-                    return e._id != route._id;
+            //    airlineFactory.bookRoute(auth.currentUserId(), route).success(function(route) {
+            routeService.bookRoute(auth.currentUserId(), route).then(function(route) {
+                    toaster.pop('success', "Success", "Booked!");
+                },
+                function(error) {
+                    toaster.pop('error', "Error", error);
                 });
-                $scope.routes.push(route);
-								//show success message with timer
-								toaster.pop('success.', "Success", "Booked!");
-            });
         };
-
-
-
-
 
     }
 ])

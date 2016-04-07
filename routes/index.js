@@ -24,13 +24,24 @@ var Route = mongoose.model('Route');
 var User = mongoose.model('User');
 
 router.get('/airlines', function(req, res, next) {
+
+  Airline.find().deepPopulate(['comments', 'routes']).exec(function(err, airlines) {
+      if (err) {
+          return next(err);
+      }
+      res.json(airlines);
+
+  });
+  /*
     Airline.find(function(err, airlines) {
         if (err) {
             return next(err);
         }
+        airlines.deepPopulate(['comments', 'routes'], function(err, deepAirlines) {
+            res.json(deepAirlines);
+        });
 
-        res.json(airlines);
-    });
+    }); */
 });
 
 // get all airports
