@@ -101,7 +101,7 @@
     </script>
     <script type="text/ng-template" id="/airlines.html">
 
-    
+
 
         <div ng-repeat="airline in airlines | orderBy: 'title'">
 
@@ -187,7 +187,7 @@
                             <span style="font-size:12px; float:left;" ng-show="!isAddRouteVisible && !isEditRouteVisible"><a ng-href="" ng-click="showEditRoute(route)">edit</a></span>
                         </div>
                         <div style="margin-top:5px;">
-                            <span style="font-size:12px; float:left;" ng-show="!isAddRouteVisible && !isEditRouteVisible"><a ng-href="" ng-click="deleteRoute(route)">delete</a></span>
+                            <span style="font-size:12px; float:left;" ng-show="!isAddRouteVisible && !isEditRouteVisible"><a ng-href="" ng-click="deleteRoute(airline._id,route)">delete</a></span>
                         </div>
                     </div>
                     <div class="col-sm-2" style="margin-top:15px;">
