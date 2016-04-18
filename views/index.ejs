@@ -18,14 +18,16 @@
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/angular-moment/0.9.0/angular-moment.min.js"></script>
 <script src="/javascripts/moment-timezone.js"></script>
-<!--<script src="/javascripts/moment-timezone-with-data.js"></script>
-<script src="/javascripts/moment-timezone-with-data-2010-2020.js"></script> -->
-
+<!-- Holder JS -->
+<script src="/javascripts/holderjs/holder.js"></script>
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBAInVVMz7mIZRS55YzZqM90pqJWvOVT80"></script>
+<script src="/javascripts/angularjs-geolocation/dist/angularjs-geolocation.min.js"></script>
 <script src="/javascripts/bootstrap.js"></script>
 <script src="/javascripts/angularApp.js"></script>
 <script type='text/javascript' src='/javascripts/ng-infinite-scroll/build/ng-infinite-scroll.min.js'></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/0.4.9/toaster.min.css" rel="stylesheet" />
-<script src="https://code.angularjs.org/1.2.0/angular-animate.min.js" ></script>
+<script src="https://code.angularjs.org/1.2.0/angular-animate.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/0.4.9/toaster.min.js"></script>
 
 <body ng-app="Volotopia" ng-controller="MainCtrl">
@@ -49,7 +51,7 @@
                         </li>
                     </ul>
                 </li>
-
+                <li ng-class="{ active: activeLink('airports')}"><a href="/#/airports">Airports</a></li>
 
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -177,7 +179,7 @@
     </script>
 
     <script type="text/ng-template" id="/airlineRoutes.html">
-    <toaster-container toaster-options="{'time-out': 3000, 'position-class': 'toast-top-center','close-button':true}"></toaster-container>
+        <toaster-container toaster-options="{'time-out': 3000, 'position-class': 'toast-top-center','close-button':true}"></toaster-container>
         <div style="margin-top:15px;" ng-repeat="route in airline.routes | orderBy: 'departureDateTime'">
 
             <div class="container">
@@ -197,12 +199,12 @@
                     </div>
                     <div class="col-sm-9">
                         <div>
-                            <span style="font-size:15px; ">{{route.departureDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} (EST) </span><span style="left-margin:15px; font-weight: 800;color:navy;">{{route.departureAirport.code}} </span>
+                            <span style="font-size:15px; ">{{route.departureDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} (EST) </span><span style="left-margin:15px; font-weight: 800;color:navy;"><a ng-href="/#/airports">{{route.departureAirport.code}}</a> </span>
 
                             <span style="margin-left:5px"><i class="fa fa-long-arrow-right"></i></span>
                         </div>
                         <div>
-                            <span style="font-size:15px;">{{route.arrivalDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'}} (EST) </span><span style="left-margin:15px;font-weight: 800; color:navy;">{{route.arrivalAirport.code}}</span>
+                            <span style="font-size:15px;">{{route.arrivalDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'}} (EST) </span><span style="left-margin:15px;font-weight: 800; color:navy;"><a ng-href="/#/airports">{{route.arrivalAirport.code}}</a></span>
                         </div>
                         <div>
                             <span style="font-size:15px;">duration: ~{{route.duration | amDurationFormat : 'minute'}}</span>
@@ -327,7 +329,7 @@
 
     <script type="text/ng-template" id="/routes.html">
         <div class='container'>
-        <toaster-container toaster-options="{'time-out': 3000, 'position-class': 'toast-top-center','close-button':true}"></toaster-container>
+            <toaster-container toaster-options="{'time-out': 3000, 'position-class': 'toast-top-center','close-button':true}"></toaster-container>
             <div class="col-sm-2" style="height:80%; background-color: whitesmoke;">
                 <div style="margin-top:75px; margin-left: 2px;">
                     <h5>Airlines:</h5>
@@ -375,9 +377,9 @@
 
                     <div class="col-sm-11" style="height: 70%; margin-top:10px; overflow-y: scroll;">
 
-                    <div ng-if="error" class="alert alert-danger row page-header text-center">
-                      <span>{{ error.message }}</span>
-                    </div>
+                        <div ng-if="error" class="alert alert-danger row page-header text-center">
+                            <span>{{ error.message }}</span>
+                        </div>
 
 
 
@@ -400,12 +402,12 @@
                                 </div>
                                 <div class="col-sm-7" style="margin-top:5px;">
                                     <div>
-                                        <span style="font-size:15px; ">{{route.departureDateTime | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} (EST) </span><span style="font-weight: 800;color:navy;">{{route.departureAirport.code}} </span>
+                                        <span style="font-size:15px; ">{{route.departureDateTime | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} (EST) </span><span style="font-weight: 800;color:navy;"><a ng-href="/#/airports">{{route.departureAirport.code}}</a> </span>
 
                                         <span style="margin-left:5px"><i class="fa fa-long-arrow-right"></i></span>
                                     </div>
                                     <div>
-                                        <span style="font-size:15px;">{{route.arrivalDateTime | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'}} (EST) </span><span style="font-weight: 800; color:navy;">{{route.arrivalAirport.code}}</span>
+                                        <span style="font-size:15px;">{{route.arrivalDateTime | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'}} (EST) </span><span style="font-weight: 800; color:navy;"><a ng-href="/#/airports">{{route.arrivalAirport.code}}</a></span>
                                     </div>
                                     <div style="font-size:15px;">
                                         <span>duration: ~{{route.duration| amDurationFormat : 'minute'}} </span>
@@ -423,15 +425,70 @@
 
             </div>
     </script>
+    <script type="text/ng-template" id="/airports.html">
+        <div class="container">
+            <toaster-container toaster-options="{'time-out': 3000, 'position-class': 'toast-top-center','close-button':true}"></toaster-container>
+            <div class="row content">
+                <!-- Google Map -->
+                <div class="col-md-7">
+                    <div id="map" style="width:500px; height:500px"></div>
+                </div>
+                <!-- Side Panel -->
+                <div class="col-md-5">
+                    <div class="panel panel-default">
 
+
+                        <div class="panel-body">
+
+                            <form name="addForm" ng-submit="createAirport()" novalidate>
+
+                                <div class="form-group">
+                                    <label for="language">Name</label>
+                                    <input type="text" class="form-control" id="name" placeholder="Name" ng-model="currentAirport.name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="language">Code</label>
+                                    <input type="text" class="form-control" id="code" placeholder="Code" ng-model="currentAirport.code" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="city">City</label>
+                                    <input type="text" class="form-control" id="city" placeholder="City" ng-model="currentAirport.city" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="selectState">State</label>
+                                    <select class="form-select" required id="selectState" style="width: 200px;" ng-model="currentAirport.state" ng-options="state.abbreviation as state.abbreviation + ' - ' + state.name for state in states | orderBy: 'abbreviation'">
+
+                                        <option value="">--Select State--</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="latitude">Latitude</label>
+                                    <input type="text" class="form-control" id="latitude" placeholder="39.500" ng-model="currentAirport.latitude" >
+                                </div>
+                                <div class="form-group">
+                                    <label for="longitude">Longitude</label>
+                                    <input type="text" class="form-control" id="longitude" placeholder="-98.350" ng-model="currentAirport.longitude" >
+                                </div>
+
+
+                                <button type="submit" class="btn btn-danger btn-block" ng-disabled="addForm.$invalid">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
     <script type="text/ng-template" id="/myFlights.html">
 
 
-    <div class="page-header text-center" ng-hide="isLoggedIn()">
+        <div class="page-header text-center" ng-hide="isLoggedIn()">
 
 
 
-                <h2>Please log in.</h2>
+            <h2>Please log in.</h2>
 
         </div>
         <div style="margin-top:15px;" ng-if="isLoggedIn()" ng-repeat="flight in user.flights | orderBy: 'departureDateTime'">
@@ -458,12 +515,12 @@
 
                 <div class="col-sm-8">
                     <div>
-                        <span style="font-size:15px; ">{{flight.departureDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} (EST) </span><span style="left-margin:15px; font-weight: 800;color:navy;">{{flight.departureAirport}} </span>
+                        <span style="font-size:15px; ">{{flight.departureDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }} (EST) </span><span style="left-margin:15px; font-weight: 800;color:navy;"><a ng-href="/#/airports">{{flight.departureAirport}}</a> </span>
 
                         <span style="margin-left:5px"><i class="fa fa-long-arrow-right"></i></span>
                     </div>
                     <div>
-                        <span style="font-size:15px;">{{flight.arrivalDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'}} (EST) </span><span style="left-margin:15px;font-weight: 800; color:navy;">{{flight.arrivalAirport}}</span>
+                        <span style="font-size:15px;">{{flight.arrivalDateTime |  amDateFormat: 'dddd, MMMM Do YYYY, h:mm a'}} (EST) </span><span style="left-margin:15px;font-weight: 800; color:navy;"><a ng-href="/#/airports">{{flight.arrivalAirport}}</a></span>
                     </div>
                     <div>
                         <span style="font-size:15px;">duration: ~{{flight.duration | amDurationFormat : 'minute'}}</span>
@@ -477,43 +534,52 @@
 
     <script type="text/ng-template" id="/login.html">
         <div class="container">
-        <div class="page-header text-center">
-              <h1><span class="fa fa-sign-in"></span> Login</h1>
-        </div>
-        <div ng-show="error" class="alert alert-danger row">
-          <span>{{ error.message }}</span>
-        </div>
-        <div class="row">
-            <div class="col-sm-5 ">
+            <div class="page-header text-center">
+                <h1><span class="fa fa-sign-in"></span> Login</h1>
+            </div>
+            <div ng-show="error" class="alert alert-danger row">
+                <span>{{ error.message }}</span>
+            </div>
+            <div class="row">
+                <div class="col-sm-5 ">
 
-                <div class="well" style="height: 250px;">
+                    <div class="well" style="height: 250px;">
 
-                    <form ng-submit="logIn()">
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" placeholder="Username" required class="form-control" ng-model="user.username" name="username">
-                        </div>
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" placeholder="Password" required class="form-control" ng-model="user.password" name="password">
-                        </div>
+                        <form ng-submit="logIn()">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" placeholder="Username" required class="form-control" ng-model="user.username" name="username">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" placeholder="Password" required class="form-control" ng-model="user.password" name="password">
+                            </div>
 
-                        <button type="submit" class="btn btn-warning btn-lg">Login</button>
-                    </form>
+                            <button type="submit" class="btn btn-warning btn-lg">Login</button>
+                        </form>
 
 
+                    </div>
                 </div>
-            </div>
-            <div class="col-sm-2 text">
-              <table>
-              <tr style="height:50px"><td><td></tr>
-              <tr style="height:100px; "><td><i style="text-center; font-size: 125px;" class="fa fa-arrows-h"></i><td></tr>
-              <tr style="height:100px"><td><td></tr>
-              </table>
-            </div>
-            <div class="col-sm-5 ">
+                <div class="col-sm-2 text">
+                    <table>
+                        <tr style="height:50px">
+                            <td>
+                                <td>
+                        </tr>
+                        <tr style="height:100px; ">
+                            <td><i style="text-center; font-size: 125px;" class="fa fa-arrows-h"></i>
+                                <td>
+                        </tr>
+                        <tr style="height:100px">
+                            <td>
+                                <td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-sm-5 ">
                     <a href="/auth/google"><span class="fa fa-google-plus" style="font-size: 225px; padding-left:10px; padding-right:10px; background-color:#d8e6f3;"></span></a>
-            </div>
+                </div>
             </div>
             <hr>
 
@@ -570,7 +636,7 @@
                 <h1><span class="glyphicon glyphicon-user"></span> Register</h1>
             </div>
             <div ng-show="error" class="alert alert-danger row">
-              <span>{{ error.message }}</span>
+                <span>{{ error.message }}</span>
             </div>
             <div class="row">
                 <div class="col-sm-5 ">
@@ -594,15 +660,24 @@
                     </div>
                 </div>
                 <div class="col-sm-2 text">
-                  <table>
-                  <tr style="height:50px"><td><td></tr>
-                  <tr style="height:100px; "><td><i style="text-center; font-size: 125px;" class="fa fa-arrows-h"></i><td></tr>
-                  <tr style="height:100px"><td><td></tr>
-                  </table>
+                    <table>
+                        <tr style="height:50px">
+                            <td>
+                                <td>
+                        </tr>
+                        <tr style="height:100px; ">
+                            <td><i style="text-center; font-size: 125px;" class="fa fa-arrows-h"></i>
+                                <td>
+                        </tr>
+                        <tr style="height:100px">
+                            <td>
+                                <td>
+                        </tr>
+                    </table>
                 </div>
                 <div class="col-sm-5 ">
 
-                        <a href="/auth/google"><span class="fa fa-google-plus" style="font-size: 225px; padding-left:10px; padding-right:10px; background-color:#d8e6f3;"></span></a>
+                    <a href="/auth/google"><span class="fa fa-google-plus" style="font-size: 225px; padding-left:10px; padding-right:10px; background-color:#d8e6f3;"></span></a>
 
 
                 </div>

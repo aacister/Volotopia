@@ -1,4 +1,6 @@
 var mongoose = require('mongoose');
+
+
 mongoose.set('debug', true);
 var deepPopulate = require('mongoose-deep-populate')(mongoose);
 
@@ -20,11 +22,11 @@ var AirlineSchema = new mongoose.Schema({
 });
 
 AirlineSchema.plugin(deepPopulate);
+
 AirlineSchema.methods.uprate = function(cb) {
     this.ratings += 1;
     this.save(cb);
 };
-
 
 
 mongoose.model('Airline', AirlineSchema);

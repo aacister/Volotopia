@@ -29,7 +29,7 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                     controller: 'AirlinesCtrl',
                     resolve: {
                         airlinesResolved: ['airlinesService', function(airlinesService) {
-													return airlinesService.airlines;
+                            return airlinesService.airlines;
                         }]
                     }
                 })
@@ -41,7 +41,7 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                 controller: 'AirlineCtrl',
                 resolve: {
                     airline: ['$stateParams', 'airlineService', function($stateParams, airlineService) {
-											return airlineService.getAirline($stateParams.id);
+                        return airlineService.getAirline($stateParams.id);
                     }]
                 }
             })
@@ -56,7 +56,7 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                 },
                 resolve: {
                     airline: ['$stateParams', 'airlineService', function($stateParams, airlineService) {
-												return airlineService.getAirline($stateParams.id);
+                        return airlineService.getAirline($stateParams.id);
                     }]
                 }
             })
@@ -71,19 +71,20 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                 },
                 resolve: {
                     airline: ['$stateParams', 'airlineService', function($stateParams, airlineService) {
-											return airlineService.getAirline($stateParams.id);
+                        return airlineService.getAirline($stateParams.id);
                     }]
                 }
             })
+
 
             .state('routes', {
                     url: '/routes',
                     templateUrl: '/routes.html',
                     controller: 'RoutesCtrl',
                     resolve: {
-											airlinesResolved: ['airlinesService', function(airlinesService) {
-												return airlinesService.airlines;
-											}]
+                        airlinesResolved: ['airlinesService', function(airlinesService) {
+                            return airlinesService.airlines;
+                        }]
 
                     }
                 })
@@ -96,6 +97,18 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                             return auth.getCurrentUser();
                         }]
                     }
+                })
+                .state('airports', {
+                    url: '/airports',
+                    templateUrl: '/airports.html',
+                    controller: 'AirportsCtrl',
+                    onEnter: ['airportMapFactory', function(airportMapFactory) {
+                      angular.element(document).ready(function () {
+                             airportMapFactory.refresh(39.500, -98.350);
+                         });
+
+                    }]
+
                 })
                 .state('login', {
                     url: '/login',
@@ -165,8 +178,192 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
         airportService.initializeAirports();
         airlinesService.initializeAirlines();
 
+
     }])
-    .service('airportService', ['$rootScope', '$http', '$q', function($rootScope, $http, $q) {
+    .service('locationService', [function() {
+        var service = {
+            states: [{
+                "name": "Alabama",
+                "abbreviation": "AL"
+            }, {
+                "name": "Alaska",
+                "abbreviation": "AK"
+            }, {
+                "name": "American Samoa",
+                "abbreviation": "AS"
+            }, {
+                "name": "Arizona",
+                "abbreviation": "AZ"
+            }, {
+                "name": "Arkansas",
+                "abbreviation": "AR"
+            }, {
+                "name": "California",
+                "abbreviation": "CA"
+            }, {
+                "name": "Colorado",
+                "abbreviation": "CO"
+            }, {
+                "name": "Connecticut",
+                "abbreviation": "CT"
+            }, {
+                "name": "Delaware",
+                "abbreviation": "DE"
+            }, {
+                "name": "District Of Columbia",
+                "abbreviation": "DC"
+            }, {
+                "name": "Federated States Of Micronesia",
+                "abbreviation": "FM"
+            }, {
+                "name": "Florida",
+                "abbreviation": "FL"
+            }, {
+                "name": "Georgia",
+                "abbreviation": "GA"
+            }, {
+                "name": "Guam",
+                "abbreviation": "GU"
+            }, {
+                "name": "Hawaii",
+                "abbreviation": "HI"
+            }, {
+                "name": "Idaho",
+                "abbreviation": "ID"
+            }, {
+                "name": "Illinois",
+                "abbreviation": "IL"
+            }, {
+                "name": "Indiana",
+                "abbreviation": "IN"
+            }, {
+                "name": "Iowa",
+                "abbreviation": "IA"
+            }, {
+                "name": "Kansas",
+                "abbreviation": "KS"
+            }, {
+                "name": "Kentucky",
+                "abbreviation": "KY"
+            }, {
+                "name": "Louisiana",
+                "abbreviation": "LA"
+            }, {
+                "name": "Maine",
+                "abbreviation": "ME"
+            }, {
+                "name": "Marshall Islands",
+                "abbreviation": "MH"
+            }, {
+                "name": "Maryland",
+                "abbreviation": "MD"
+            }, {
+                "name": "Massachusetts",
+                "abbreviation": "MA"
+            }, {
+                "name": "Michigan",
+                "abbreviation": "MI"
+            }, {
+                "name": "Minnesota",
+                "abbreviation": "MN"
+            }, {
+                "name": "Mississippi",
+                "abbreviation": "MS"
+            }, {
+                "name": "Missouri",
+                "abbreviation": "MO"
+            }, {
+                "name": "Montana",
+                "abbreviation": "MT"
+            }, {
+                "name": "Nebraska",
+                "abbreviation": "NE"
+            }, {
+                "name": "Nevada",
+                "abbreviation": "NV"
+            }, {
+                "name": "New Hampshire",
+                "abbreviation": "NH"
+            }, {
+                "name": "New Jersey",
+                "abbreviation": "NJ"
+            }, {
+                "name": "New Mexico",
+                "abbreviation": "NM"
+            }, {
+                "name": "New York",
+                "abbreviation": "NY"
+            }, {
+                "name": "North Carolina",
+                "abbreviation": "NC"
+            }, {
+                "name": "North Dakota",
+                "abbreviation": "ND"
+            }, {
+                "name": "Northern Mariana Islands",
+                "abbreviation": "MP"
+            }, {
+                "name": "Ohio",
+                "abbreviation": "OH"
+            }, {
+                "name": "Oklahoma",
+                "abbreviation": "OK"
+            }, {
+                "name": "Oregon",
+                "abbreviation": "OR"
+            }, {
+                "name": "Palau",
+                "abbreviation": "PW"
+            }, {
+                "name": "Pennsylvania",
+                "abbreviation": "PA"
+            }, {
+                "name": "Puerto Rico",
+                "abbreviation": "PR"
+            }, {
+                "name": "Rhode Island",
+                "abbreviation": "RI"
+            }, {
+                "name": "South Carolina",
+                "abbreviation": "SC"
+            }, {
+                "name": "South Dakota",
+                "abbreviation": "SD"
+            }, {
+                "name": "Tennessee",
+                "abbreviation": "TN"
+            }, {
+                "name": "Texas",
+                "abbreviation": "TX"
+            }, {
+                "name": "Utah",
+                "abbreviation": "UT"
+            }, {
+                "name": "Vermont",
+                "abbreviation": "VT"
+            }, {
+                "name": "Virgin Islands",
+                "abbreviation": "VI"
+            }, {
+                "name": "Virginia",
+                "abbreviation": "VA"
+            }, {
+                "name": "Washington",
+                "abbreviation": "WA"
+            }, {
+                "name": "West Virginia",
+                "abbreviation": "WV"
+            }, {
+                "name": "Wisconsin",
+                "abbreviation": "WI"
+            }, {
+                "name": "Wyoming",
+                "abbreviation": "WY"
+            }]
+        }
+        return service;
+    }])
+    .service('airportService', ['$rootScope', '$http', '$q', 'auth', function($rootScope, $http, $q, auth) {
         var service = {
             airports: [],
             initializeAirports: function() {
@@ -182,8 +379,25 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                 return deferred.promise;
 
 
+            },
+            addAirport: function(airport) {
+                var deferred = $q.defer();
+                $http.post('/airports/', airport, {
+                    headers: {
+                        Authorization: 'Bearer ' + auth.getToken()
+                    }
+                }).success(function(airport) {
+                    service.airports.push(airport);
+                    $rootScope.$broadcast('airports.update');
+                    deferred.resolve(airport);
+                }).error(function(msg) {
+                    deferred.reject(msg);
+                });
+
+                return deferred.promise;
+
             }
-        }
+        };
         return service;
     }])
     .service('airlineService', ['$rootScope', '$http', '$q', 'auth', function($rootScope, $http, $q, auth) {
@@ -198,9 +412,9 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                     return service.airline;
                 });
             },
-						getAirline: function(id){
-							return $http.get('/airlines/' + id);
-						},
+            getAirline: function(id) {
+                return $http.get('/airlines/' + id);
+            },
             addRoute: function(route) {
                 var deferred = $q.defer();
                 $http.post('/airlines/' + service.airline._id + '/routes', route, {
@@ -258,25 +472,25 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
 
             },
 
-						bookFlight: function(userId, route) {
-								var deferred = $q.defer();
-								$http.put('/user/' + userId + '/routes/' + route._id + '/book', route, {
-										headers: {
-												Authorization: 'Bearer ' + auth.getToken()
-										}
-								}).success(function(route) {
-										service.airline.routes = $.grep(service.airline.routes, function(e) {
-												return e._id != route._id;
-										});
-										service.airline.routes.push(route);
-										deferred.resolve(service.airline);
-								}).error(function(msg) {
-										deferred.reject(msg);
-								});
+            bookFlight: function(userId, route) {
+                var deferred = $q.defer();
+                $http.put('/user/' + userId + '/routes/' + route._id + '/book', route, {
+                    headers: {
+                        Authorization: 'Bearer ' + auth.getToken()
+                    }
+                }).success(function(route) {
+                    service.airline.routes = $.grep(service.airline.routes, function(e) {
+                        return e._id != route._id;
+                    });
+                    service.airline.routes.push(route);
+                    deferred.resolve(service.airline);
+                }).error(function(msg) {
+                    deferred.reject(msg);
+                });
 
-								return deferred.promise;
+                return deferred.promise;
 
-						},
+            },
 
 
             deleteRoute: function(route) {
@@ -390,21 +604,21 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                 return deferred.promise;
             },
 
-						bookAirlineFlight: function(userId, route) {
+            bookAirlineFlight: function(userId, route) {
                 var deferred = $q.defer();
-								airlineService.setAirline(route.airline._id).success(function(){
-									airlineService.bookFlight(userId, route).then(function(airline){
-										service.airlines = $.grep(service.airlines, function(e) {
-												return e._id != route.airline._id;
-										});
-										service.airlines.push(airline);
+                airlineService.setAirline(route.airline._id).success(function() {
+                    airlineService.bookFlight(userId, route).then(function(airline) {
+                        service.airlines = $.grep(service.airlines, function(e) {
+                            return e._id != route.airline._id;
+                        });
+                        service.airlines.push(airline);
 
-										$rootScope.$broadcast('airlines.update');
-										deferred.resolve(route);
-									}, function(msg){
-										deferred.reject(msg);
-									});
-								});
+                        $rootScope.$broadcast('airlines.update');
+                        deferred.resolve(route);
+                    }, function(msg) {
+                        deferred.reject(msg);
+                    });
+                });
                 return deferred.promise;
             },
 
@@ -491,85 +705,85 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
         return service;
     }])
 
-    .factory('auth', ['$http', '$window', '$state', function($http, $window, $state) {
-        var auth = {};
-        auth.saveToken = function(token) {
-            $window.localStorage['volotopia-token'] = token;
-        };
+.factory('auth', ['$http', '$window', '$state', function($http, $window, $state) {
+    var auth = {};
+    auth.saveToken = function(token) {
+        $window.localStorage['volotopia-token'] = token;
+    };
 
-        auth.getToken = function() {
-            return $window.localStorage['volotopia-token'];
+    auth.getToken = function() {
+        return $window.localStorage['volotopia-token'];
+    }
+
+    auth.isLoggedIn = function() {
+        var token = auth.getToken();
+
+        if (token) {
+            var payload = JSON.parse($window.atob(token.split('.')[1]));
+
+            return payload.exp > Date.now() / 1000;
+        } else {
+            return false;
         }
+    };
 
-        auth.isLoggedIn = function() {
+    auth.getCurrentUser = function() {
+        if (auth.isLoggedIn()) {
             var token = auth.getToken();
+            var payload = JSON.parse($window.atob(token.split('.')[1]));
 
-            if (token) {
-                var payload = JSON.parse($window.atob(token.split('.')[1]));
-
-                return payload.exp > Date.now() / 1000;
-            } else {
-                return false;
-            }
-        };
-
-        auth.getCurrentUser = function() {
-            if (auth.isLoggedIn()) {
-                var token = auth.getToken();
-                var payload = JSON.parse($window.atob(token.split('.')[1]));
-
-                var id = payload._id;
-                return $http.get('/users/' + id).then(function(res) {
-                    return res.data;
-                });
-            }
-        };
-
-        auth.currentUserId = function() {
-            if (auth.isLoggedIn()) {
-                var token = auth.getToken();
-                var payload = JSON.parse($window.atob(token.split('.')[1]));
-
-                return payload._id;
-            }
-        };
-
-
-        auth.currentUser = function() {
-            if (auth.isLoggedIn()) {
-                var token = auth.getToken();
-                var payload = JSON.parse($window.atob(token.split('.')[1]));
-
-                return payload.username;
-            }
-        };
-
-        auth.register = function(user) {
-            return $http.post('/register', user).success(function(data) {
-                auth.saveToken(data.token);
+            var id = payload._id;
+            return $http.get('/users/' + id).then(function(res) {
+                return res.data;
             });
-        };
-
-        auth.logIn = function(user) {
-            return $http.post('/login', user).success(function(data) {
-                auth.saveToken(data.token);
-            });
-        };
-
-        auth.logOut = function() {
-            $window.localStorage.removeItem('volotopia-token');
-            $state.go('login');
-        };
-
-        auth.googleLogIn = function() {
-            return $http.get('/auth/google').success(function(data) {
-                auth.saveToken(data.token);
-            });
-
-
         }
-        return auth;
-    }])
+    };
+
+    auth.currentUserId = function() {
+        if (auth.isLoggedIn()) {
+            var token = auth.getToken();
+            var payload = JSON.parse($window.atob(token.split('.')[1]));
+
+            return payload._id;
+        }
+    };
+
+
+    auth.currentUser = function() {
+        if (auth.isLoggedIn()) {
+            var token = auth.getToken();
+            var payload = JSON.parse($window.atob(token.split('.')[1]));
+
+            return payload.username;
+        }
+    };
+
+    auth.register = function(user) {
+        return $http.post('/register', user).success(function(data) {
+            auth.saveToken(data.token);
+        });
+    };
+
+    auth.logIn = function(user) {
+        return $http.post('/login', user).success(function(data) {
+            auth.saveToken(data.token);
+        });
+    };
+
+    auth.logOut = function() {
+        $window.localStorage.removeItem('volotopia-token');
+        $state.go('login');
+    };
+
+    auth.googleLogIn = function() {
+        return $http.get('/auth/google').success(function(data) {
+            auth.saveToken(data.token);
+        });
+
+
+    }
+    return auth;
+}])
 
 .factory('airlineFactory', ['$http', 'auth', function($http, auth) {
 
@@ -592,8 +806,105 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
 
 }])
 
-//filter on to, from, date
-.filter('routeSearch', [function() {
+.factory('airportMapFactory', ['$http','airportService', function($http, airportService) {
+
+        var airportMapService = {};
+        var locations = [];
+
+        var selectedLat = 39.50;
+        var selectedLong = -98.35;
+
+        airportMapService.refresh = function(latitude, longitude) {
+            locations = [];
+            selectedLat = latitude;
+            selectedLong = longitude;
+
+            var airports = [];
+            $http.get('/airports').success(function(data) {
+                angular.copy(data, airports);
+
+                locations = convertToMapPoints(airports);
+
+                initialize(latitude, longitude);
+            });
+
+        };
+
+        var convertToMapPoints = function(response) {
+            var locations = [];
+            for (var i = 0; i < response.length; i++) {
+                var airport = response[i];
+
+                var contentString =
+                    '<p><b>Name</b>: ' + airport.name +
+                    '<br><b>Code</b>: ' + airport.code +
+                    '<br><b>City</b>: ' + airport.city +
+                    '<br><b>State</b>: ' + airport.state +
+                    '</p>';
+
+                // Converts each of the JSON records into Google Maps Location format (Note [Lat, Lng] format).
+                locations.push({
+                    latlon: new google.maps.LatLng(airport.location[0], airport.location[1]),
+                    message: new google.maps.InfoWindow({
+                        content: contentString,
+                        maxWidth: 320
+                    }),
+                    name: airport.name,
+                    code: airport.code,
+                    city: airport.city,
+                    state: airport.state
+                });
+            }
+            return locations;
+        };
+
+        var initialize = function(latitude, longitude) {
+
+            var airportLatLng = {
+                lat: selectedLat,
+                lng: selectedLong
+            };
+
+            if (!map) {
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    zoom:4,
+                    center: airportLatLng
+                });
+            }
+
+            locations.forEach(function(n, i) {
+                var marker = new google.maps.Marker({
+                    position: n.latlon,
+                    map: map,
+                    icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                });
+
+                google.maps.event.addListener(marker, 'click', function(e) {
+                    currentSelectedMarker = n;
+                    n.message.open(map, marker);
+                });
+                lastMarker = marker;
+            });
+/*
+            var initialLocation = new google.maps.LatLng(latitude, longitude);
+            var marker = new google.maps.Marker({
+                position: initialLocation,
+        //        animation: google.maps.Animation.BOUNCE,
+                map: map,
+        //        icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+            });
+
+      //      lastMarker = marker;
+*/
+        };
+
+        google.maps.event.addDomListener(window, 'load',
+            airportMapService.refresh(selectedLat, selectedLong));
+
+        return airportMapService;
+    }])
+    //filter on to, from, date
+    .filter('routeSearch', [function() {
         return function(data, from, to, departDate, airlines) {
             var output = [];
             if (!!to && !!from && !!departDate && airlines.length > 0) {
@@ -812,9 +1123,9 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
                     upvotes: 0
                 }).then(function(comment) {
 
-                }, function(err){
-									toaster.pop('error', 'Error', err);
-								});
+                }, function(err) {
+                    toaster.pop('error', 'Error', err);
+                });
                 $scope.body = '';
                 $scope.isAddComment = false;
             };
@@ -933,62 +1244,107 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
     ])
 
 .controller('RoutesCtrl', ['$scope', '$state', 'toaster', 'auth', 'airlinesService', 'airportService', 'airlinesResolved',
-    function($scope, $state, toaster, auth,  airlinesService, airportService, airlinesResolved) {
+        function($scope, $state, toaster, auth, airlinesService, airportService, airlinesResolved) {
 
-        $scope.airports = airportService.airports;
-        $scope.airlines = airlinesResolved;
-				$scope.routes = getRoutes();
-        $scope.isSearchResultsVisible = true;
-        $scope.airlineFilters = [];
-        $scope.isLoggedIn = auth.isLoggedIn;
-
-
-        $scope.$on('airlines.update', function(event) {
-						$scope.airlines = airlinesService.airlines;
-            $scope.routes = getRoutes();
-        });
-
-        $scope.$on('airports.update', function(event) {
             $scope.airports = airportService.airports;
-        })
-
-				function getRoutes()
-				{
-					var routes = [];
-					for ( x=0; x< $scope.airlines.length; x++) {
-						var airline = $scope.airlines[x];
-						for(i=0; i<airline.routes.length; i++)
-						{
-							var route = airline.routes[i];
-							routes.push(route);
-						}
-					}
-					return routes;
-				}
-
-        $scope.setAirlineFilter = function($event, airline) {
-            var id = airline._id;
-            var checkbox = $event.target;
-            var action = (checkbox.checked ? 'add' : 'remove');
-            if (action == 'add' & $scope.airlineFilters.indexOf(id) == -1) $scope.airlineFilters.push(id);
-            if (action == 'remove' && $scope.airlineFilters.indexOf(id) != -1) $scope.airlineFilters.splice($scope.airlineFilters.indexOf(id), 1);
+            $scope.airlines = airlinesResolved;
+            $scope.routes = getRoutes();
+            $scope.isSearchResultsVisible = true;
+            $scope.airlineFilters = [];
+            $scope.isLoggedIn = auth.isLoggedIn;
 
 
-        };
+            $scope.$on('airlines.update', function(event) {
+                $scope.airlines = airlinesService.airlines;
+                $scope.routes = getRoutes();
+            });
 
-        $scope.bookFlight = function(route) {
-            airlinesService.bookAirlineFlight(auth.currentUserId(), route).then(function(route) {
-                    toaster.pop('success', "Success", "Booked!");
-                },
-                function(error) {
-                    toaster.pop('error', "Error", error);
-                });
-        };
+            $scope.$on('airports.update', function(event) {
+                $scope.airports = airportService.airports;
+            })
 
-    }
-])
+            function getRoutes() {
+                var routes = [];
+                for (x = 0; x < $scope.airlines.length; x++) {
+                    var airline = $scope.airlines[x];
+                    for (i = 0; i < airline.routes.length; i++) {
+                        var route = airline.routes[i];
+                        routes.push(route);
+                    }
+                }
+                return routes;
+            }
 
-.controller('MyFlightsCtrl', ['$scope', 'auth', 'airlineFactory', 'userResolved',
+            $scope.setAirlineFilter = function($event, airline) {
+                var id = airline._id;
+                var checkbox = $event.target;
+                var action = (checkbox.checked ? 'add' : 'remove');
+                if (action == 'add' & $scope.airlineFilters.indexOf(id) == -1) $scope.airlineFilters.push(id);
+                if (action == 'remove' && $scope.airlineFilters.indexOf(id) != -1) $scope.airlineFilters.splice($scope.airlineFilters.indexOf(id), 1);
+
+
+            };
+
+            $scope.bookFlight = function(route) {
+                airlinesService.bookAirlineFlight(auth.currentUserId(), route).then(function(route) {
+                        toaster.pop('success', "Success", "Booked!");
+                    },
+                    function(error) {
+                        toaster.pop('error', "Error", error);
+                    });
+            };
+
+        }
+    ])
+    .controller('AirportsCtrl', ['$scope', 'locationService', 'airportService', 'airportMapFactory', 'toaster',
+        function($scope, locationService, airportService, airportMapFactory, toaster) {
+            $scope.airports = airportService.airports;
+            $scope.states = locationService.states;
+
+            $scope.$on('airports.update', function(event) {
+                $scope.airports = airportService.airports;
+            });
+
+            $scope.currentAirport = {};
+            var coords = {};
+            var lat = 0;
+            var long = 0;
+
+            $scope.currentAirport.latitude = 39.500;
+            $scope.currentAirport.longitude = -98.350;
+
+            $scope.createAirport = function() {
+
+                var airportData = {
+                    name: $scope.currentAirport.name,
+                    code: $scope.currentAirport.code,
+                    city: $scope.currentAirport.city,
+                    state: $scope.currentAirport.state,
+                    location: [$scope.currentAirport.latitude, $scope.currentAirport.longitude],
+                    htmlverified: $scope.currentAirport.htmlverified
+                };
+
+                airportService.addAirport(airportData)
+                    .then(function(data) {
+                            //Refresh map
+                            airportMapFactory.refresh($scope.currentAirport.latitude, $scope.currentAirport.longitude);
+                            $scope.currentAirport.name = "";
+                            $scope.currentAirport.code = "";
+                            $scope.currentAirport.city = "";
+                            $scope.currentAirport.state = "";
+                            //    $scope.currentAirport.latitude = 39.500;
+                            //    $scope.currentAirport.longitude = -98.350;
+
+                            toaster.pop('success', "Success", "Airport added!");
+
+                        },
+                        function(err) {
+                            toaster.pop('error', "Error", err);
+                        });
+            };
+        }
+    ])
+    .controller('MyFlightsCtrl', ['$scope', 'auth', 'airlineFactory', 'userResolved',
         function($scope, auth, airlineFactory, userResolved) {
             $scope.user = userResolved;
             $scope.isLoggedIn = auth.isLoggedIn;
@@ -1049,19 +1405,19 @@ angular.module('Volotopia', ['ui.router', 'angularMoment', 'toaster', ])
         '$scope',
         '$state',
         'airlineFactory',
-				'airlinesService',
+        'airlinesService',
         'auth',
         function($scope, $state, airlineFactory, airlinesService, auth) {
             $scope.airlines = [];
             $scope.activeLink = function(n) {
                 return ($state.is(n) ? "active" : "");
             };
-						$scope.$on('airlines.update', function(event) {
-		            $scope.airlines = airlinesService.airlines;
-		        })
+            $scope.$on('airlines.update', function(event) {
+                $scope.airlines = airlinesService.airlines;
+            })
 
             $scope.getAirlines = function() {
-								$scope.airlines = airlinesService.airlines;
+                $scope.airlines = airlinesService.airlines;
             };
 
             $scope.googleLogIn = function() {

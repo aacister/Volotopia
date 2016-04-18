@@ -81,4 +81,7 @@ UserSchema.methods.generateGoogleJWT = function() {
         exp: parseInt(exp.getTime() / 1000),
     }, 'SECRET');
 };
+
+
+
 mongoose.model('User', UserSchema);

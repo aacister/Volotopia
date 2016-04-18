@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+
 var passport = require('passport');
 var moment = require('moment-timezone');
 var flash    = require('connect-flash');
@@ -12,12 +13,14 @@ var session      = require('express-session');
 
 moment().tz("America/New_York").format();
 mongoose.set('debug', true);
-mongoose.connect('mongodb://aacister:password123@ds015760.mlab.com:15760/heroku_8kqk50d6', function(err){
+/*mongoose.connect('mongodb://aacister:password123@ds015760.mlab.com:15760/heroku_8kqk50d6', function(err){
   if(err) throw err;
-});
-/*mongoose.connect('mongodb://localhost/Volotopia', function(err) {
+}); */
+mongoose.connect('mongodb://localhost/Volotopia', function(err) {
     if (err) throw err;
-});*/
+});
+
+
 
 require('./models/Airlines');
 require('./models/Comments');

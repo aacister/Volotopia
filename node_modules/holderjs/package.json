@@ -1,0 +1,106 @@
+{
+  "_args": [
+    [
+      "holderjs",
+      "/Users/aacister/Documents/MeanApps/Flytopia/volotopia"
+    ]
+  ],
+  "_from": "holderjs@latest",
+  "_id": "holderjs@2.9.3",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/holderjs",
+  "_nodeVersion": "4.3.1",
+  "_npmOperationalInternal": {
+    "host": "packages-9-west.internal.npmjs.com",
+    "tmp": "tmp/holderjs-2.9.3.tgz_1456611681867_0.01013048063032329"
+  },
+  "_npmUser": {
+    "email": "hello@imsky.co",
+    "name": "imsky"
+  },
+  "_npmVersion": "2.14.12",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "holderjs",
+    "raw": "holderjs",
+    "rawSpec": "",
+    "scope": null,
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/holderjs/-/holderjs-2.9.3.tgz",
+  "_shasum": "28d55fd5e2cf5c76ad6dc50183ad27a01867a576",
+  "_shrinkwrap": null,
+  "_spec": "holderjs",
+  "_where": "/Users/aacister/Documents/MeanApps/Flytopia/volotopia",
+  "author": {
+    "name": "Ivan Malopinsky",
+    "url": "http://imsky.co"
+  },
+  "bugs": {
+    "url": "https://github.com/imsky/holder/issues"
+  },
+  "dependencies": {
+    "shaven": "^0.8.1"
+  },
+  "description": "Holder uses SVG to render image placeholders entirely in browser.",
+  "devDependencies": {
+    "component-type": "^1.1.0",
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.2.0",
+    "gulp-header": "^1.0.2",
+    "gulp-jsbeautifier": "0.0.5",
+    "gulp-jshint": "^1.6.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.3",
+    "gulp-todo": "^0.3.8",
+    "gulp-uglify": "^1.2.0",
+    "gulp-util": "~3",
+    "moment": "^2.6.0",
+    "node-http-server": "^3.0.0",
+    "trim": "0.0.1",
+    "webdriverio": "^2.4.5",
+    "webpack-stream": "^2.1.1"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "28d55fd5e2cf5c76ad6dc50183ad27a01867a576",
+    "tarball": "https://registry.npmjs.org/holderjs/-/holderjs-2.9.3.tgz"
+  },
+  "gitHead": "325b1053364cc37c74d59efaca83dd3b6389d772",
+  "homepage": "http://holderjs.com",
+  "keywords": [
+    "canvas",
+    "client-side",
+    "development",
+    "generation",
+    "images",
+    "placeholders",
+    "svg"
+  ],
+  "license": "MIT",
+  "main": "holder.js",
+  "maintainers": [
+    {
+      "name": "imsky",
+      "email": "hello@imsky.co"
+    }
+  ],
+  "name": "holderjs",
+  "officialName": "Holder",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/imsky/holder.git"
+  },
+  "scripts": {
+    "test": "node test/index"
+  },
+  "summary": "client side image placeholders",
+  "version": "2.9.3"
+}
