@@ -1,9 +1,14 @@
 # Volotopia
 Website built using MEAN stack.  Online flight booking agent.
 
-Front-end angular code is consolidated to 2 files: public/javascript/AngularApp.js & views/index.ejs
+Front-end angular code is consolidated to 2 files: 
+public/javascript/AngularApp.js  
+views/index.ejs
+
 ExpressJS routing file: routes/index.js
+
 Mongoose Model: located in models directory
+
 Passport authentication: config directory
 
 This code is modularized into components, using ES6 in the Volotopia_ES6 repository.
