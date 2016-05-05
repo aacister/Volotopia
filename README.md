@@ -12,6 +12,7 @@ Mongoose Model: located in models directory
 Passport authentication: config directory
 
 This code is modularized into components, using ES6 in the Volotopia_ES6 repository.
+
 Its service layer API has been isolated in the VolotopiaAPI repository.
 
 Site is published at https://quiet-forest-46848.herokuapp.com
