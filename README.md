@@ -11,7 +11,7 @@ Mongoose Model: located in models directory
 
 Passport authentication: config directory
 
-This code is modularized into components, using ES6 in the Volotopia_ES6 repository.
+This code is modularized, using ES6 in the Volotopia_ES6 repository.
 
 Its service layer API has been isolated in the VolotopiaAPI repository.
 
