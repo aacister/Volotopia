@@ -15,4 +15,4 @@ This code is modularized, using ES6 in the Volotopia_ES6 repository.
 
 Its service layer API has been isolated in the VolotopiaAPI repository.
 
-Site is published at https://quiet-forest-46848.herokuapp.com
+Site is published at https://volotopia.herokuapp.com
