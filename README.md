@@ -9,7 +9,9 @@ ExpressJS routing file: routes/index.js
 
 Mongoose Model: located in models directory
 
-Passport authentication: config directory
+JWT authorization with expiration.  Stored in LocalStorage for sessions. 
+
+Passport authentication (local and Google oauth): config directory
 
 This code is modularized, using ES6 in the Volotopia_ES6 repository.
 
